@@ -11,6 +11,8 @@ use App\Services\BaseServices;
 use App\Services\Users\UserServices;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
+use Illuminate\Database\Eloquent\Collection;
+
 
 class GoodsServices extends BaseServices
 {
@@ -123,6 +125,58 @@ class GoodsServices extends BaseServices
         ]);
         $footprint->save();
         return $footprint;
+    }
+
+    /**
+     * 获取新发商品
+     * @param $limit
+     * @param int $offset
+     * @return \App\Models\BaseModel[]|\App\Models\Goods\Category[]|Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Query\Builder[]|\Illuminate\Support\Collection|\think\Collection
+     */
+    public function getNewGoods($limit, $offset = 0)
+    {
+
+        $conditions = [
+            'is_on_sale' => 1,
+            'is_new'     => 1
+        ];
+        return $this->getGoodsByConditions($conditions, $offset, $limit);
+    }
+
+    /**
+     * @param $conditions
+     * @param $offset
+     * @param $limit
+     * @param  string  $sort
+     * @param  string  $order
+     * @param  string[]  $columns
+     * @return Goods[]|Builder[]|Collection|\Illuminate\Database\Query\Builder[]|\Illuminate\Support\Collection
+     * 根据条件获取商品数据
+     */
+    private function getGoodsByConditions(
+        $conditions,
+        $offset,
+        $limit,
+        $sort = 'add_time',
+        $order = 'desc',
+        $columns = ['id', 'name', 'brief', 'pic_url', 'is_new', 'is_hot', 'counter_price', 'retail_price']
+    ) {
+        return Goods::query()->where($conditions)->offset($offset)->limit($limit)->orderBy($sort, $order)->get($columns);
+    }
+
+    /**
+     * @param $offset
+     * @param $limit
+     * @return Goods[]|Builder[]|Collection|\Illuminate\Database\Query\Builder[]|\Illuminate\Support\Collection
+     * 获取热门商品
+     */
+    public function getHotGoods($limit, $offset = 0)
+    {
+        $conditions = [
+            'is_hot'     => 1,
+            'is_on_sale' => 1
+        ];
+        return $this->getGoodsByConditions($conditions, $offset, $limit);
     }
 
 }

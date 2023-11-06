@@ -60,5 +60,5 @@ Route::prefix('share')->group(function () {
 
 Route::prefix('home')->group(function () {
     Route::get('home/redirectShareUrl', 'HomeController@redirectShareUrl')->name('redirectShareurl');
-    Route::get('home/index', 'HomeController@index');
+    Route::get('index', 'HomeController@index');
 });

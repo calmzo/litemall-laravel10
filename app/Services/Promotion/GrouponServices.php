@@ -2,6 +2,7 @@
 
 namespace App\Services\Promotion;
 
+use App\Models\Promotion\Groupon;
 use App\Services\BaseServices;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -12,6 +13,11 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class GrouponServices extends BaseServices
 {
+
+    public function getGrouponListByLimit($limit = 5, $offset = 0, $order = 'desc', $sort = 'add_time')
+    {
+        return Groupon::query()->offset($offset)->limit($limit)->orderBy($sort, $order)->get();
+    }
 
     /**
      * 创建图片示例

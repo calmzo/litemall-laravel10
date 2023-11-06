@@ -13,6 +13,10 @@ class BrandServices extends BaseServices
         return Brand::query()->find($id);
     }
 
+    public function getBrandByLimit($limit, $columns = ['*'], $offset = 0)
+    {
+        return Brand::query()->offset($offset)->limit($limit)->get($columns);
+    }
 
     public function getBrandList(int $page, int $limit, $sort, $order)
     {
