@@ -189,3 +189,15 @@ DOMAIN=.larabbs.test
 
    项目介绍：Taro_Mall是一款多端开源在线商城应用程序，后台是基于litemall基础上进行开发，前端采用Taro框架编写。
 
+## 问题
+
+1. 新建路由相关
+
+2. jwt相关
+
+3. 设置laravel 接口异常错误返回json数据 
+   【文件Exceptions\Handler.php重写render方法】
+    
+4. 表名前缀问题
+    database.php中设置前缀
+
