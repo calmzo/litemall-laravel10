@@ -1,0 +1,18 @@
+<?php
+
+namespace DummyNamespace;
+
+class DummyClass extends BaseEnums
+{
+
+    /**
+     * @param null $key
+     * @return array|mixed|string
+     */
+    public static function definition($key = null)
+    {
+        $list = [];
+        return self::getDesc($list, $key);
+    }
+}
+

@@ -1,0 +1,9 @@
+<?php
+
+namespace {{ namespace }};
+
+class {{ class }} extends BaseController
+{
+    //
+    protected $except = [];
+}
