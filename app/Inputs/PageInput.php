@@ -4,7 +4,7 @@ namespace App\Inputs;
 
 use Illuminate\Validation\Rule;
 
-class pageInput extends Input
+class PageInput extends Input
 {
     public $page = 1;
     public $limit = 10;

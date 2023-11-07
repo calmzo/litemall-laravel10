@@ -51,6 +51,13 @@ Route::prefix('goods')->group(function () {
 
 Route::prefix('order')->group(function () {
     Route::get('h5pay', 'OrderController@h5pay');
+    Route::any('list', 'OrderController@list');
+    Route::any('detail', 'OrderController@detail');
+    Route::any('submit', 'OrderController@submit');
+    Route::any('cancel', 'OrderController@cancel');
+    Route::any('refund', 'OrderController@refund');
+    Route::any('delete', 'OrderController@delete');
+    Route::any('confirm', 'OrderController@confirm');
 });
 
 

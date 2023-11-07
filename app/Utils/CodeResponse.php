@@ -14,7 +14,7 @@ class CodeResponse
 
 
     const UN_LOGIN = [501, '请登录'];
-    const UPDATE_DATA_FAILED = [505, '更新数据失败'];
+    const UPDATED_FAIL = [505, '更新数据失败'];
 
 
     //业务返回码

@@ -2,7 +2,8 @@
 
 namespace App\Services;
 
-
+use App\Exceptions\BusinessException;
+use App\Utils\CodeResponse;
 
 class BaseServices
 {
@@ -32,6 +33,18 @@ class BaseServices
     }
 
 
+    /**
+     * @param  array  $response
+     * @param  null  $info
+     * @throws BusinessException
+     */
+    public function throwBusinessException(array $response = CodeResponse::PARAM_ILLEGAL, $info = null)
+    {
+        if (!is_null($info)) {
+            $response[1] = $info;
+        }
+        throw new BusinessException($response);
+    }
 
 }
 

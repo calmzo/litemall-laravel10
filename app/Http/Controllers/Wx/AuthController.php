@@ -96,7 +96,7 @@ class AuthController extends WxController
         $user->last_login_time = now();
         $user->last_login_ip = $request->getClientIp();
         if (!$user->save()) {
-            return $this->fail(CodeResponse::UPDATE_DATA_FAILED);
+            return $this->fail(CodeResponse::UPDATED_FAIL);
         }
         $token = Auth::guard('wx')->login($user);
         return $this->success([
