@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Wx;
 
 use App\Models\Users\User;
 use App\Notifications\VerifycationCode;
-use App\Services\Users\UserServices;
+use App\Services\User\UserServices;
 use App\Utils\CodeResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;

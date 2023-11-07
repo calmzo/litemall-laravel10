@@ -22,7 +22,7 @@ class GoodsListInput extends Input
         return [
             'categoryId' => 'integer',
             'brandId' => 'integer',
-            'keyword' => 'sometimes|regex:/^1[345789][0-9]{9}$/',
+            'keyword' => 'string',
             'isNew'      => 'boolean',
             'isHot'      => 'boolean',
             'page'       => 'integer',

@@ -8,7 +8,7 @@ use App\Models\Goods\Comment;
 use App\Models\Goods\Footprint;
 use App\Models\Goods\Goods;
 use App\Services\BaseServices;
-use App\Services\Users\UserServices;
+use App\Services\User\UserServices;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Database\Eloquent\Collection;

@@ -62,3 +62,16 @@ Route::prefix('home')->group(function () {
     Route::get('home/redirectShareUrl', 'HomeController@redirectShareUrl')->name('redirectShareurl');
     Route::get('index', 'HomeController@index');
 });
+
+//订单模块--购物车
+Route::prefix('cart')->group(function () {
+    Route::post('add', 'CartController@add');
+    Route::post('fastadd', 'CartController@fastadd');
+    Route::any('countProduct', 'CartController@countProduct');
+    Route::post('update', 'CartController@update');
+    Route::post('delete', 'CartController@delete');
+    Route::post('checked', 'CartController@checked');
+    Route::any('index', 'CartController@index');
+    Route::any('goodscount', 'CartController@goodscount');
+    Route::get('checkout', 'CartController@checkout');
+});

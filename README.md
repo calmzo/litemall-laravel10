@@ -200,4 +200,15 @@ DOMAIN=.larabbs.test
     
 4. 表名前缀问题
     database.php中设置前缀
+   
+5. 兼容前端token认证
+    ```php 
+   public function handle($request, Closure $next, ...$guards)
+    {
+        if (!is_null($request->headers->get("X-Litemall-Token"))) {
+            $request->headers->set('Authorization','Bearer '.$request->headers->get("X-Litemall-Token"));
+        }
+        return $next($request);
+    } 
+   ```
 

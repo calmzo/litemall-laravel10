@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Services\Users;
+namespace App\Services\User;
 
-use App\Models\Users\User;
+use App\Models\User\User;
 use App\Services\BaseServices;
 
 class UserServices extends BaseServices
