@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "815b99efc1def574707afd2764668eed",
+    "content-hash": "9428a3f2e621778f4d5d2c1b5c7054e0",
     "packages": [
         {
             "name": "brick/math",
@@ -1957,6 +1957,58 @@
             "time": "2023-10-17T14:13:20+00:00"
         },
         {
+            "name": "leonis/easysms-notification-channel",
+            "version": "2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/yl/easysms-notification-channel.git",
+                "reference": "8cd72db241f1546f400341cdc5eb5788230ac747"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/yl/easysms-notification-channel/zipball/8cd72db241f1546f400341cdc5eb5788230ac747",
+                "reference": "8cd72db241f1546f400341cdc5eb5788230ac747",
+                "shasum": ""
+            },
+            "require": {
+                "overtrue/easy-sms": "^2.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Leonis\\Notifications\\EasySms\\EasySmsChannelServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Leonis\\Notifications\\EasySms\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "yangliu",
+                    "email": "yangliulnn@163.com"
+                }
+            ],
+            "description": "EasySms Notification Channel for Laravel.",
+            "keywords": [
+                "easysms",
+                "laravel",
+                "notifications"
+            ],
+            "support": {
+                "issues": "https://github.com/yl/easysms-notification-channel/issues",
+                "source": "https://github.com/yl/easysms-notification-channel/tree/2.0.0"
+            },
+            "time": "2021-12-24T09:12:09+00:00"
+        },
+        {
             "name": "monolog/monolog",
             "version": "3.5.0",
             "source": {
@@ -2452,6 +2504,72 @@
                 }
             ],
             "time": "2023-02-08T01:06:31+00:00"
+        },
+        {
+            "name": "overtrue/easy-sms",
+            "version": "2.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/overtrue/easy-sms.git",
+                "reference": "81d4deec69bbb6de6e5fdd7ab90cc933bd3e3046"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/overtrue/easy-sms/zipball/81d4deec69bbb6de6e5fdd7ab90cc933bd3e3046",
+                "reference": "81d4deec69bbb6de6e5fdd7ab90cc933bd3e3046",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "guzzlehttp/guzzle": "^6.2 || ^7.0",
+                "php": ">=5.6"
+            },
+            "require-dev": {
+                "brainmaestro/composer-git-hooks": "^2.8",
+                "jetbrains/phpstorm-attributes": "^1.0",
+                "mockery/mockery": "~1.3.3 || ^1.4.2",
+                "phpunit/phpunit": "^5.7 || ^7.5 || ^8.5.19 || ^9.5.8"
+            },
+            "type": "library",
+            "extra": {
+                "hooks": {
+                    "pre-commit": [
+                        "composer check-style",
+                        "composer psalm",
+                        "composer test"
+                    ],
+                    "pre-push": [
+                        "composer check-style"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Overtrue\\EasySms\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "overtrue",
+                    "email": "i@overtrue.me"
+                }
+            ],
+            "description": "The easiest way to send short message.",
+            "support": {
+                "issues": "https://github.com/overtrue/easy-sms/issues",
+                "source": "https://github.com/overtrue/easy-sms/tree/2.5.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/overtrue",
+                    "type": "github"
+                }
+            ],
+            "time": "2023-08-07T07:51:17+00:00"
         },
         {
             "name": "phpoption/phpoption",

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Wx;
 
-use App\Models\Users\User;
+use App\Models\User\User;
 use App\Notifications\VerifycationCode;
 use App\Services\User\UserServices;
 use App\Utils\CodeResponse;
