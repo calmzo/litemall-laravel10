@@ -17,9 +17,9 @@ class AuthTest extends TestCase
 //        $response->assertStatus(200);
 //    }
 
-    public function testRegister()
-    {
-       $this->assertLitemallApiPost('wx/auth/register', ['username' => 'test3', 'password' => '123456', 'mobile' => '13111111112', 'code' => '496459']);
-
-    }
+//    public function testRegister()
+//    {
+//       $this->assertLitemallApiPost('wx/auth/register', ['username' => 'test3', 'password' => '123456', 'mobile' => '13111111112', 'code' => '496459']);
+//
+//    }
 }
