@@ -6,6 +6,7 @@ use App\Models\User\User;
 use App\Services\User\UserServices;
 use App\Utils\CodeResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
@@ -43,25 +44,29 @@ class AuthController extends WxController
 //            return ResponseUtil.fail(AUTH_INVALID_MOBILE, "手机号格式不正确");
 //        }
 
+        //验证验证码 todo 放开校验
+//        UserServices::getInstance()->checkCaptcha($mobile, $code);
 
-        if ($code != Cache::get('register_captcha_' . $mobile)) {
-            return $this->fail(CodeResponse::AUTH_CAPTCHA_UNMATCH, '验证码错误');
-        }
+        $avatar = 'https://yanxuan.nosdn.127.net/80841d741d7fa3073e0ae27bf487339f.jpg?imageView&quality=90&thumbnail=64x64';
         //微信登录 todos
 
         $user = new User();
         $user->username = $username;
         $user->password = Hash::make($password);
         $user->mobile = $mobile;
-        $user->avatar = 'https://yanxuan.nosdn.127.net/80841d741d7fa3073e0ae27bf487339f.jpg?imageView&quality=90&thumbnail=64x64';
+        $user->avatar = $avatar;
         $user->nickname = $username;
-        $user->last_login_time = now();
+        $user->last_login_time = Carbon::now()->toDateTimeString();
         $user->last_login_ip = $request->getClientIp();
+        $user->add_time        = Carbon::now()->toDateTimeString();
+        $user->update_time     = Carbon::now()->toDateTimeString();
         $user->save();
 
         // 给新用户发送注册优惠券
 //        couponAssignService.assignForRegister(user.getId());
         $token = Auth::guard('wx')->login($user);
+        //TODO 新用户发券
+
         $ret = [
             'token' => $token,
             'userInfo' => $user

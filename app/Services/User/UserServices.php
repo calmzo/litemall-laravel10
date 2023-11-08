@@ -2,8 +2,10 @@
 
 namespace App\Services\User;
 
+use App\Exceptions\BusinessException;
 use App\Models\User\User;
 use App\Services\BaseServices;
+use App\Utils\CodeResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Notification;
@@ -107,6 +109,25 @@ class UserServices extends BaseServices
             new PhoneNumber($mobile, 86)
         )->notify(new VerificationCode($code, 'SMS_117526525'));
         return true;
+    }
+
+    /**
+     * @param $mobile
+     * @param $code
+     * @return bool
+     * @throws BusinessException
+     * 检查验证码
+     */
+    public function checkCaptcha($mobile, $code)
+    {
+        $key    = 'register_captcha_' . $mobile;
+        $isPass = $code == Cache::get($key);
+        if ($isPass) {
+            Cache::forget($key);
+            return true;
+        } else {
+            throw new BusinessException(CodeResponse::AUTH_CAPTCHA_UNMATCH);
+        }
     }
 
 }
