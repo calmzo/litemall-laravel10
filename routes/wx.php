@@ -89,3 +89,9 @@ Route::prefix('coupon')->group(function () {
     Route::any('mylist', 'CouponController@mylist');
     Route::any('receive', 'CouponController@receive');
 });
+
+//商品模块--团购
+Route::prefix('groupon')->group(function () {
+    Route::get('list', 'GrouponController@list');
+    Route::get('test', 'GrouponController@test');
+});
