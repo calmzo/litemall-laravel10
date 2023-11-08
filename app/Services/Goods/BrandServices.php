@@ -2,12 +2,22 @@
 
 namespace App\Services\Goods;
 
+use App\Inputs\PageInput;
 use App\Models\Goods\Brand;
 use App\Services\BaseServices;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 class BrandServices extends BaseServices
 {
 
+    /**
+     * @param $id
+     * @return Builder|Builder[]|Collection|Model|null
+     * 获取品牌的详细数据
+     */
     public function getBrand($id)
     {
         return Brand::query()->find($id);
@@ -18,14 +28,14 @@ class BrandServices extends BaseServices
         return Brand::query()->offset($offset)->limit($limit)->get($columns);
     }
 
-    public function getBrandList(int $page, int $limit, $sort, $order)
+    /**
+     * @param PageInput $page
+     * @param string[] $columns
+     * @return LengthAwarePaginator
+     */
+    public function getBrandList(PageInput $page, $columns = ['*'])
     {
-        $query = Brand::query()->where('deleted', 0);
-        if (!empty($sort) && !empty($order)) {
-            $query = $query->orderBy($sort, $order);
-        }
-
-        return $query->paginate($limit, ['*'], 'page', $page);
+        return Brand::query()->orderBy($page->sort, $page->order)->paginate($page->limit, $columns, 'page', $page->page);
     }
 
 }
