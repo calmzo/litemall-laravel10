@@ -1,41 +1,39 @@
 <?php
 
+
 namespace App\Services;
 
+use App\CodeResponse;
 use App\Exceptions\BusinessException;
-use App\Utils\CodeResponse;
 
 class BaseServices
 {
+    protected static $instance = [];
 
-    protected static $instace;
+    private function __construct()
+    {
+    }
+
+    private function __clone()
+    {
+    }
 
     /**
      * @return static
      */
     public static function getInstance()
     {
-        if (static::$instace instanceof static) {
-            return static::$instace;
+        if ((static::$instance[static::class] ?? []) instanceof static) {
+            return static::$instance[static::class];
         }
-        static::$instace = new static();
-        return static::$instace;
-
-    }
-
-    private function __construct()
-    {
-    }
-
-
-    private function clone()
-    {
+        static::$instance[static::class] = new static();
+        return static::$instance[static::class];
     }
 
 
     /**
-     * @param  array  $response
-     * @param  null  $info
+     * @param array $response
+     * @param null $info
      * @throws BusinessException
      */
     public function throwBusinessException(array $response = CodeResponse::PARAM_ILLEGAL, $info = null)
@@ -45,6 +43,4 @@ class BaseServices
         }
         throw new BusinessException($response);
     }
-
 }
-

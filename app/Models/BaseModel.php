@@ -16,6 +16,7 @@ class BaseModel extends Model
 
     public const CREATED_AT = 'add_time';
     public const UPDATED_AT = 'update_time';
+    public static $instance = null;
 
     /**
      * 表名约定
@@ -42,11 +43,10 @@ class BaseModel extends Model
      * 类初始化
      * @return $this
      */
-    public function new()
+    public static function new()
     {
         return new static();
     }
-
     /**
      * 转驼峰
      * @return array

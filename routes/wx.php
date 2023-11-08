@@ -82,3 +82,10 @@ Route::prefix('cart')->group(function () {
     Route::any('goodscount', 'CartController@goodscount');
     Route::get('checkout', 'CartController@checkout');
 });
+
+//商品模块--优惠券
+Route::prefix('coupon')->group(function () {
+    Route::any('list', 'CouponController@list');
+    Route::any('mylist', 'CouponController@mylist');
+    Route::any('receive', 'CouponController@receive');
+});

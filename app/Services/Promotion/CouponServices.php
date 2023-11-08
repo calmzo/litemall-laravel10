@@ -2,12 +2,19 @@
 
 namespace App\Services\Promotion;
 
-use App\CodeResponse;
+use App\Exceptions\BusinessException;
 use App\Inputs\PageInput;
 use App\Models\Promotion\Coupon;
 use App\Models\Promotion\CouponUser;
 use App\Services\BaseServices;
+use App\Utils\CodeResponse;
 use App\Utils\Constant;
+use Carbon\Carbon;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Concerns\BuildsQueries;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 class CouponServices extends BaseServices
 {
@@ -188,7 +195,7 @@ class CouponServices extends BaseServices
             $start_time = $coupon->start_time;
             $end_time   = $coupon->end_time;
         } elseif ($timeType == Constant::COUPON_TIME_TYPE_DAYS) {
-            $start_time = \Illuminate\Support\Carbon::now()->toDateTimeString();
+            $start_time = Carbon::now()->toDateTimeString();
             $end_time   = date("Y-m-d H:i:s", time() + $coupon->days * 24 * 3600);
         }
         $this->saveCouponUser($userId, $couponId, $start_time, $end_time);

@@ -56,15 +56,15 @@ class WxController extends Controller
         return $this->success($this->paginate($page));
     }
 
-    protected function paginate($page)
+    protected function paginate($page, $list = null)
     {
         if ($page instanceof LengthAwarePaginator) {
             return [
                 'total' => $page->total(),
-                'page' => $page->currentPage(),
+                'page' => $page->total() == 0 ? 0 : $page->currentPage(),
                 'limit' => $page->perPage(),
-                'pages' => $page->lastPage(),
-                'list' => $page->items()
+                'pages' => $page->total() == 0 ? 0 : $page->lastPage(),
+                'list' => $list ?? $page->items()
             ];
         }
         if ($page instanceof Collection) {
