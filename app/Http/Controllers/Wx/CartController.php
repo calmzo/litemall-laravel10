@@ -16,7 +16,7 @@ use Illuminate\Http\JsonResponse;
 class CartController extends WxController
 {
     //
-    protected $except = [];
+//    protected $except = [];
 
     /**
      * @return JsonResponse

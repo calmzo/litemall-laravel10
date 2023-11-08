@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Wx;
 
 use App\Exceptions\BusinessException;
 use App\Inputs\GoodsListInput;
+use App\Services\CollectServices;
+use App\Services\CommentServices;
 use App\Services\Goods\BrandServices;
 use App\Services\Goods\CatalogServices;
+use App\Services\Goods\CategoryServices;
 use App\Services\Goods\GoodsAttributeServices;
 use App\Services\Goods\GoodsProductServices;
 use App\Services\Goods\GoodsServices;
@@ -23,42 +26,35 @@ class GoodsController extends WxController
 
     public function count()
     {
-        $goodsCount = GoodsServices::getInstance()->queryOnSale();
+        $goodsCount = GoodsServices::getInstance()->countGoodsOnSales();
         return $this->success($goodsCount);
 
     }
 
     /**
-     * 商品分类类目
      * @param  Request  $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      * @throws BusinessException
+     * 获取商品分类的数据
      */
     public function category(Request $request)
     {
         $id = $this->verifyId('id');
-        $cur = CatalogServices::getInstance()->findById($id);
-        if (is_null($cur)) {
+        $currentCategory = CatalogServices::getInstance()->findById($id);
+        if (is_null($currentCategory)) {
             throw new BusinessException(CodeResponse::SYSTEM_ERROR);
         }
         $parent = null;
-        $children = null;
-        if ($cur->pid == 0) {
-            $parent = $cur;
-            $children = CatalogServices::getInstance()->getL2List($cur->id);
-            $cur = $children->first() ?? $cur;
+        if ($currentCategory->pid == 0) {
+            $parentCategory = $currentCategory;
+            $brotherCategory = CatalogServices::getInstance()->getL2List($currentCategory->id);
+            $currentCategory = !is_null($brotherCategory) ? $brotherCategory->first() : $currentCategory;
         } else {
-            $parent = CatalogServices::getInstance()->findById($cur->pid);
-            $children = CatalogServices::getInstance()->getL2List($cur->pid);
+            $parentCategory = CatalogServices::getInstance()->findById($currentCategory->pid);
+            $brotherCategory = CatalogServices::getInstance()->getL2List($currentCategory->pid);
         }
 
-
-        return $this->success([
-            'currentCategory' => $cur,
-            'parentCategory' => $parent,
-            'brotherCategory' => $children,
-
-        ]);
+        return $this->success(compact('currentCategory', 'parentCategory', 'brotherCategory'));
 
 
     }
@@ -68,17 +64,22 @@ class GoodsController extends WxController
         $input = GoodsListInput::new();
         //添加到搜索历史
         if ($this->isLogin() && !empty($input->keyWord)) {
-            SearchHistoryServices::getInstance()->save($this->userId(), $keyword, Constant::SEARCH_HISTORY_FROM_WX);
+            SearchHistoryServices::getInstance()->save($this->userId(), $input->keyword,
+                Constant::SEARCH_HISTORY_FROM_WX);
         }
 
-        //todo 优化查询传参
-        $goodsList = GoodsServices::getInstance()->listGoods($input);
+        //todo 优化查询传参 查询列表数据
+        $goodsList = GoodsServices::getInstance()->goodsLists($input);
 
-        $caregoryList = GoodsServices::getInstance()->listL2Gategory($input);
+        //查询商品所属类目列表
+        $categoryIds = GoodsServices::getInstance()->getCatIds($input);
 
-        $goodsList = $this->paginate($goodsList);
-        $goodsList['filterCategoryList'] = $caregoryList;
-        return $this->success($goodsList);
+//        $caregoryList = GoodsServices::getInstance()->listL2Gategory($input);
+        $categoryList = CategoryServices::getInstance()->getCategoryByIds($categoryIds);
+
+        $lists                       = $this->paginate($goodsList);
+        $lists['filterCategoryList'] = $categoryList;
+        return $this->success($lists);
     }
 
     public function detail(Request $request)
@@ -87,34 +88,33 @@ class GoodsController extends WxController
         //商品信息
         $info = GoodsServices::getInstance()->findById($id);
         //商品属性
-        $goodsAttributeList = GoodsAttributeServices::getInstance()->queryListByGid($id);
+        $goodsAttributeList = GoodsServices::getInstance()->getGoodsAttributesList($id);
         //商品规格 返回的是定制的GoodsSpecificationVo
-        $specificationList = GoodsSpecificationServices::getInstance()->getSpecificationVoList($id);
+        $specificationList = GoodsServices::getInstance()->getGoodsSpecification($id);
 
         //商品规格对应的数量和价格
-        $productList = GoodsProductServices::getInstance()->queryListByGid($id);
+        $productList = GoodsServices::getInstance()->getGoodsProducts($id);
 
         //商品问题，这里是一些通用问题
-        $issue = IssueServices::getInstance()->querySelective("", 1, 4);
+        $issue = GoodsServices::getInstance()->getGoodsIssue();
 
         //商品品牌商
         $brand = $info->brand_id ? BrandServices::getInstance()->getBrand($info->brand_id) : (object) [];
 
-        // 用户收藏
-        $userHasCollect = 0;
+        //商品评论
+        $goodComment = CommentServices::getInstance()->getGoodsCommentWithUserInfo($id);
+
+        //用户收藏数
+        $userHasCollect = CollectServices::getInstance()->getGoodsCollect($id);
+
         if ($this->isLogin()) {
-            $userHasCollect = GoodsServices::getInstance()->getCollectCount($this->userId(), 0, $id);
             // 记录用户的足迹 异步处理 todo
             GoodsServices::getInstance()->saveFootprint($this->userId(), $id);
 
         }
 
-
         //团购信息 todo
         $groupon = [];
-
-        //评论
-        $comments = GoodsServices::getInstance()->getCommentWithUserInfo($id);
 
 
         $data = [
@@ -123,7 +123,7 @@ class GoodsController extends WxController
             'issue' => $issue,
             'attribute' => $goodsAttributeList,
             'specificationList' => $specificationList,
-            'comment' => $comments,
+            'comment' => $goodComment,
             'productList' => $productList,
             'brand' => $brand,
             'groupon' => $groupon,

@@ -3,14 +3,14 @@
 namespace App\Services\Goods;
 
 use App\Inputs\GoodsListInput;
-use App\Models\Goods\Collect;
-use App\Models\Goods\Comment;
-use App\Models\Goods\Footprint;
+use App\Models\Collect;
+use App\Models\Comment;
+use App\Models\FootPrint;
 use App\Models\Goods\Goods;
 use App\Models\Goods\GoodsAttribute;
 use App\Models\Goods\GoodsProduct;
 use App\Models\Goods\GoodsSpecification;
-use App\Models\Goods\Issue;
+use App\Models\Issue;
 use App\Services\BaseServices;
 use App\Services\User\UserServices;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,27 +21,11 @@ use Illuminate\Database\Eloquent\Collection;
 class GoodsServices extends BaseServices
 {
 
-    public function queryOnSale()
-    {
-        return Goods::query()->where(['is_on_sale' => 1, 'deleted' => 0])->count('id');
-    }
-
-    public function listGoods(GoodsListInput $input)
-    {
-        $query = $this->getQueryByGoodsFilter($input);
-        if (!empty($input->categoryId)) {
-            $query = $query->where('category_id', $input->categoryId);
-        }
-        return $query->orderBy($input->sort, $input->order)->paginate($input->limit,
-            ['id', 'name', 'brief', 'pic_url', 'is_hot', 'is_new', 'counter_price', 'retail_price'], 'page', $input->page);
-
-    }
-
 
     public function listL2Gategory(GoodsListInput $input)
     {
 
-        $query = $this->getQueryByGoodsFilter($input);
+        $query = $this->getGoodsQuery($input);
         $categoryIds = $query->select('category_id')->pluck('category_id')->toArray();
         return CatalogServices::getInstance()->getL2ListByIds($categoryIds);
     }
@@ -303,7 +287,7 @@ class GoodsServices extends BaseServices
      * @return mixed
      * 获取商品的列表
      */
-    public function GoodsLists(GoodsListInput $input)
+    public function goodsLists(GoodsListInput $input)
     {
 
         $query = Goods::query()->select([
