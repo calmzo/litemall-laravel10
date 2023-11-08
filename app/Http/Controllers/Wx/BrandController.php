@@ -24,15 +24,11 @@ class BrandController extends WxController
 
     public function detail(Request $request)
     {
-        $id = $request->input('id');
-        if (empty($id)) {
-            return $this->fail(CodeResponse::PARAM_VALUE_ILLEGAL);
-        }
+        $id    = $this->verifyId('id');
         $brand = BrandServices::getInstance()->getBrand($id);
 
         if (is_null($brand)) {
-            return $this->fail(CodeResponse::PARAM_VALUE_ILLEGAL);
-
+            return $this->fail(CodeResponse::PARAM_NOT_EMPTY);
         }
         return $this->success($brand);
     }

@@ -15,27 +15,22 @@ class CatalogController extends WxController
     {
         // 所有一级分类目录
         $id = $request->input('id');
-        $l1CatList = CatalogServices::getInstance()->getL1List();
+        $categoryList = CatalogServices::getInstance()->getL1List();
 
         // 当前一级分类目录
         if (empty($id)) {
-            $currentCategory = $l1CatList[0];
+            $currentCategory = $categoryList->first();
         } else {
-            $currentCategory = CatalogServices::getInstance()->findById($id);
+            $currentCategory = $categoryList->where('id', $id)->first();
         }
 
         $currentSubCategory = null;
         // 当前一级分类目录对应的二级分类目录
         if (!is_null($currentCategory)) {
-            $currentSubCategory = CatalogServices::getInstance()->getL2List($currentCategory->id);
+            $currentSubCategory = CatalogServices::getInstance()->getL2ListDataByPid($currentCategory->id);
         }
 
-        return $this->success([
-            'currentCategory' => $currentCategory,
-            'categoryList' => $l1CatList,
-            'currentSubCategory' => $currentSubCategory,
-
-        ]);
+        return $this->success(compact('currentCategory', 'categoryList', 'currentSubCategory'));
     }
 
 
@@ -44,21 +39,21 @@ class CatalogController extends WxController
         // 所有一级分类目录
         $id = $request->input('id');
         if (empty($id)) {
-            return $this->fail(CodeResponse::PARAM_VALUE_ILLEGAL);
+            return $this->fail(CodeResponse::PARAM_NOT_EMPTY);
+        } else {
+            $categoryLists   = CatalogServices::getInstance()->getL1List();
+            $currentCategory = $categoryLists->where('id', $id)->first();
         }
 
         // 当前分类
         $currentCategory = Category::query()->find($id);
         if (is_null($currentCategory)) {
-            return $this->fail(CodeResponse::PARAM_VALUE_ILLEGAL);
+            return $this->fail(CodeResponse::PARAM_NOT_EMPTY);
         }
-        $currentSubCategory = CatalogServices::getInstance()->getL2List($currentCategory->id);
+//        $currentSubCategory = CatalogServices::getInstance()->getL2List($currentCategory->id);
+        $currentSubCategory = CatalogServices::getInstance()->getL2ListDataByPid($currentCategory->id);
 
-        return $this->success([
-            'currentCategory' => $currentCategory,
-            'currentSubCategory' => $currentSubCategory,
-
-        ]);
+        return $this->success(compact('currentCategory', 'currentSubCategory'));
     }
 
 

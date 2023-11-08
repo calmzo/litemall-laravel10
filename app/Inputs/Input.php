@@ -27,7 +27,8 @@ class Input
         $data = array_filter($data);
         $validator = Validator::make($data, $rules, $message);
         if ($validator->fails()) {
-            throw new BusinessException(CodeResponse::PARAM_VALUE_ILLEGAL, $validator->errors()->first());
+//            throw new BusinessException(CodeResponse::PARAM_NOT_EMPTY, $validator->errors()->first());
+            throw new BusinessException(CodeResponse::PARAM_NOT_EMPTY, $validator->errors());
         }
         //只接收子类定义的值
         $map = get_object_vars($this);

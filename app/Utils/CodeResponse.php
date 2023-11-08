@@ -10,10 +10,11 @@ class CodeResponse
 
 
     const BADARGUMENT = [401, '参数不对'];
-    const PARAM_VALUE_ILLEGAL = [402, '参数值不对'];
+    const PARAM_NOT_EMPTY = [402, 'arg0must not be null'];
 
 
     const UN_LOGIN = [501, '请登录'];
+    const SYSTEM_ERROR    = [502, '系统内部错误'];
     const UPDATED_FAIL = [505, '更新数据失败'];
 
 

@@ -39,7 +39,7 @@ class GoodsController extends WxController
         $id = $this->verifyId('id');
         $cur = CatalogServices::getInstance()->findById($id);
         if (is_null($cur)) {
-            throw new BusinessException(CodeResponse::PARAM_VALUE_ILLEGAL);
+            throw new BusinessException(CodeResponse::SYSTEM_ERROR);
         }
         $parent = null;
         $children = null;

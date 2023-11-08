@@ -85,7 +85,8 @@ trait VerifyRequestInpuit
 //            return $value;
 //        }
         if ($validator->fails()) {
-            throw new BusinessException(CodeResponse::PARAM_VALUE_ILLEGAL, $validator->errors()->first());
+//            throw new BusinessException(CodeResponse::PARAM_NOT_EMPTY, $validator->errors()->first());
+            throw new BusinessException(CodeResponse::PARAM_NOT_EMPTY, $validator->errors());
         }
         return $value;
     }
