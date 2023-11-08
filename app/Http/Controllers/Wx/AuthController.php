@@ -3,17 +3,12 @@
 namespace App\Http\Controllers\Wx;
 
 use App\Models\User\User;
-use App\Notifications\VerifycationCode;
 use App\Services\User\UserServices;
 use App\Utils\CodeResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Notification;
-use Leonis\Notifications\EasySms\Channels\EasySmsChannel;
-use Overtrue\EasySms\PhoneNumber;
 
 class AuthController extends WxController
 {
@@ -49,7 +44,7 @@ class AuthController extends WxController
 //        }
 
 
-        if ($code != Cache::get('register_captcha_'.$mobile)) {
+        if ($code != Cache::get('register_captcha_' . $mobile)) {
             return $this->fail(CodeResponse::AUTH_CAPTCHA_UNMATCH, '验证码错误');
         }
         //微信登录 todos
@@ -111,30 +106,23 @@ class AuthController extends WxController
     public function regCaptcha(Request $request)
     {
         //todo 获取手机号
-        $mobile = $request->input('mobile', '13153187435');
-        //todo 随机生成6位验证码
-        $code = random_int(100000, 999999);
+        $mobile = $this->verifyId('mobile');
+        $user = UserServices::getInstance()->getByMobile($mobile);
+        if (!is_null($user)) {
+            return $this->fail(CodeResponse::AUTH_MOBILE_REGISTERED);
+        }
+
         //todo 防刷
-        $lock = Cache::add('register_captcha_lock_'.$mobile, 1, 5);
+        $lock = Cache::add('register_captcha_lock_' . $mobile, 1, 60);
         if (!$lock) {
             return $this->fail(CodeResponse::AUTH_CAPTCHA_FREQUENCY);
         }
-        $countKey = 'register_captcha_count_'.$mobile;
-        if (Cache::has($countKey)) {
-            $count = Cache::increment($countKey);
-            if ($count > 3) {
-                return $this->fail(CodeResponse::AUTH_CAPTCHA_FREQUENCY, '验证码当天不能超过10条');
-            }
-        } else {
-            Cache::put($countKey, 0, Carbon::now()->diffInSeconds(now()));
+        $isPass = UserServices::getInstance()->checkMobileSendCaptchaCount($mobile, 10);
+        if (!$isPass) {
+            return $this->fail(CodeResponse::AUTH_CAPTCHA_FREQUENCY, '验证码每天发送不能超过10次');
         }
-        //todo 保存手机号和验证码关系
-        Cache::put('register_captcha_'.$mobile, $code, 600);
-        // todo 发送短信
-        Notification::route(
-            EasySmsChannel::class,
-            new PhoneNumber($mobile, 86)
-        )->notify(new VerifycationCode($code));
+        $code = UserServices::getInstance()->setCaptcha($mobile);
+        UserServices::getInstance()->sendCaptchaMsg($mobile, $code);
 
         return $this->success();
     }
@@ -155,7 +143,7 @@ class AuthController extends WxController
 
     /**
      * 账号密码重置
-     * @param  Request  $request
+     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function reset(Request $request)
@@ -168,7 +156,7 @@ class AuthController extends WxController
             return $this->fail(CodeResponse::BADARGUMENT);
         }
 
-        if ($code != Cache::get('register_captcha_'.$mobile)) {
+        if ($code != Cache::get('register_captcha_' . $mobile)) {
             return $this->fail(CodeResponse::AUTH_CAPTCHA_UNMATCH, '验证码错误');
         }
         $user = UserServices::getInstance()->getByMobile($mobile);
@@ -195,7 +183,7 @@ class AuthController extends WxController
             return $this->fail(CodeResponse::BADARGUMENT);
         }
 
-        if ($code != Cache::get('register_captcha_'.$mobile)) {
+        if ($code != Cache::get('register_captcha_' . $mobile)) {
             return $this->fail(CodeResponse::AUTH_CAPTCHA_UNMATCH, '验证码错误');
         }
         $useByMobile = UserServices::getInstance()->getByMobile($mobile);
@@ -214,18 +202,18 @@ class AuthController extends WxController
     public function profile(Request $request)
     {
         $id = Auth::user()->id;
-        $avatar= $request->input('avatar');
+        $avatar = $request->input('avatar');
         $gender = $request->input('gender');
         $nickname = $request->input('nickname');
 
         $user = UserServices::getInstance()->getById($id);
-        if (!is_null($avatar)){
+        if (!is_null($avatar)) {
             $user->avatar = $avatar;
         }
-        if (!is_null($gender)){
+        if (!is_null($gender)) {
             $user->gender = $gender;
         }
-        if (!is_null($nickname)){
+        if (!is_null($nickname)) {
             $user->nickname = $nickname;
         }
         $user->save();
