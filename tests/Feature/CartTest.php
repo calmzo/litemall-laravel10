@@ -170,7 +170,8 @@ class CartTest extends TestCase
 
     }
 
-    public function testFastAdd(){
+    public function testFastAdd()
+    {
         $resp = $this->post('wx/cart/add', [
             'goodsId' => $this->production->goods_id,
             'productId' => $this->production->id,
@@ -191,6 +192,36 @@ class CartTest extends TestCase
 
         $resp->assertJson(["errno" => 0, "errmsg" => "成功", 'data' => $cart->id]);
 
+
+    }
+
+    public function testIndex()
+    {
+        $resp = $this->post('wx/cart/add', [
+            'goodsId' => $this->production->goods_id,
+            'productId' => $this->production->id,
+            'number' => 2,
+        ], $this->authHeader);
+        $resp->assertJson(["errno" => 0, "data" => "2", "errmsg" => "成功"]);
+
+        $resp = $this->get('wx/cart/index', $this->authHeader);
+        $resp->assertJson(["errno" => 0,
+            "data" => [
+                "cartList" => [
+                    [
+                        "userId" => $this->user->id,
+                        "goodsId" => $this->production->goods_id,
+                        "productId" => $this->production->id
+                    ]
+                ],
+                "cartTotal" => [
+                    "goodsCount" => 2,
+                    "goodsAmount" => 1998.0,
+                    "checkedGoodsCount" => 2,
+                    "checkedGoodsAmount" => 1998.0
+                ]
+            ],
+            "errmsg" => "成功"]);
 
     }
 }
