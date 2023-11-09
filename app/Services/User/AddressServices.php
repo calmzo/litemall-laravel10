@@ -2,11 +2,11 @@
 
 namespace App\Services\User;
 
-use App\CodeResponse;
 use App\Exceptions\BusinessException;
 use App\Input\AddressSaveInput;
 use App\Models\User\Address;
 use App\Services\BaseServices;
+use App\Utils\CodeResponse;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;

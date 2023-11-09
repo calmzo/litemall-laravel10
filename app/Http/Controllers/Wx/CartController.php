@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Wx;
 
-use App\CodeResponse;
 use App\Exceptions\BusinessException;
 use App\Services\Goods\GoodsServices;
 use App\Services\Order\CartServices;
 use App\Services\Promotion\CouponServices;
 use App\Services\SystemServices;
 use App\Services\User\AddressServices;
+use App\Utils\CodeResponse;
 use Exception;
 use Illuminate\Http\JsonResponse;
 

@@ -73,4 +73,67 @@ class CartTest extends TestCase
 
 
     }
+
+    public function testUpdate()
+    {
+        $resp = $this->post('wx/cart/add', [
+            'goodsId' => $this->production->goods_id,
+            'productId' => $this->production->id,
+            'number' => 2,
+        ], $this->authHeader);
+        $resp->assertJson(["errno" => 0, "data" => "2", "errmsg" => "成功"]);
+
+        $cart = CartServices::getInstance()->getCartProduct($this->user->id,
+            $this->production->id, $this->production->goods_id);
+
+        $resp = $this->post('wx/cart/update', [
+            'id' => $cart->id,
+            'goodsId' => $this->production->goods_id,
+            'productId' => $this->production->id,
+            'number' => 6,
+        ], $this->authHeader);
+        $resp->assertJson(["errno" => 0, "errmsg" => "成功"]);
+
+        $resp = $this->post('wx/cart/update', [
+            'id' => $cart->id,
+            'goodsId' => $this->production->goods_id,
+            'productId' => $this->production->id,
+            'number' => 11,
+        ], $this->authHeader);
+        $resp->assertJson(['errno' => 711, 'errmsg' => '商品库存不足!']);
+
+        $resp = $this->post('wx/cart/update', [
+            'id' => $cart->id,
+            'goodsId' => $this->production->goods_id,
+            'productId' => $this->production->id,
+            'number' => 0,
+        ], $this->authHeader);
+        $resp->assertJson(["errno" => 402]);
+    }
+
+    public function testDelete()
+    {
+        $resp = $this->post('wx/cart/add', [
+            'goodsId' => $this->production->goods_id,
+            'productId' => $this->production->id,
+            'number' => 2,
+        ], $this->authHeader);
+        $resp->assertJson(["errno" => 0, "data" => "2", "errmsg" => "成功"]);
+        $cart = CartServices::getInstance()->getCartProduct($this->user->id,
+            $this->production->id, $this->production->goods_id);
+        $this->assertNotNull($cart);
+
+        $resp = $this->post('wx/cart/delete', [
+            'productIds' => [$this->production->id]
+        ], $this->authHeader);
+
+        $cart = CartServices::getInstance()->getCartProduct($this->user->id,
+            $this->production->id, $this->production->goods_id);
+        $this->assertNull($cart);
+
+        $resp = $this->post('wx/cart/delete', [
+            'productIds' => []
+        ], $this->authHeader);
+        $resp->assertJson(["errno" => 402, "errmsg" => "参数值不对"]);
+    }
 }

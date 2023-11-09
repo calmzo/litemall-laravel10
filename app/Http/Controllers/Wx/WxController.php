@@ -87,6 +87,24 @@ class WxController extends Controller
 
     }
 
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     * 401
+     */
+    protected function badArgument()
+    {
+        return $this->fail(CodeResponse::PARAM_ILLEGAL);
+    }
+
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     * 402
+     */
+    protected function badArgumentValue()
+    {
+        return $this->fail(CodeResponse::PARAM_NOT_EMPTY);
+    }
+
     public function user()
     {
         return Auth::guard('wx')->user();
