@@ -2,19 +2,51 @@
 
 namespace Tests;
 
-use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
-use Illuminate\Support\Facades\Log;
-use App\Input\OrderGoodsSubmit;
+use App\Inputs\OrderGoodsSubmit;
 use App\Models\Goods\GoodsProduct;
-use App\Models\Promotion\GrouponRules;
-use App\Models\User\User;
 use App\Services\Order\CartServices;
 use App\Services\Order\OrderServices;
 use App\Services\User\AddressServices;
-use GuzzleHttp\Client;
+use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Support\Facades\Log;
+use App\Models\User\User;
+
 abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication;
+
+    protected $token;
+
+    /**
+     * @var User $user
+     */
+    public $user;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->user = User::factory()->create();
+    }
+
+    public function getSimpleOrder($products = [[1.1, 1], [1.2, 1], [1.3, 1]])
+    {
+        $this->user = factory(User::class)->state('address_default')->create();
+        $address    = AddressServices::getInstance()->getDefaultAddress($this->user->id);
+        foreach ($products as list($price, $num)) {
+            $product = GoodsProduct::factory()->create(['price' => $price]);
+            CartServices::getInstance()->add($product->goods_id, $product->id, $num, $this->user->id);
+        }
+        $input = OrderGoodsSubmit::new([
+            'addressId'      => $address->id,
+            'cartId'         => 0,
+            'grouponRulesId' => 0,
+            'message'        => '备注'
+        ]);
+        $order =  OrderServices::getInstance()->submit($this->user->id, $input);
+        $order->actual_price = $order->actual_price - $order->freight_price;
+        $order->save();
+        return $order;
+    }
 
     public function assertLitemallApiGet($url, $ignore = [])
     {

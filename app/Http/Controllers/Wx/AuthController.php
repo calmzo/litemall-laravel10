@@ -28,7 +28,7 @@ class AuthController extends WxController
 
         //参数验证
         if (is_null($username) || is_null($password) || is_null($password) || is_null($code)) {
-            return $this->fail(CodeResponse::BADARGUMENT);
+            return $this->fail(CodeResponse::PARAM_ILLEGAL);
         }
         $userByUsername = UserServices::getInstance()->getByUsername($username);
         if ($userByUsername) {
@@ -81,7 +81,7 @@ class AuthController extends WxController
         $password = $request->input('password');
         //参数验证
         if (is_null($username) || is_null($password)) {
-            return $this->fail(CodeResponse::BADARGUMENT);
+            return $this->fail(CodeResponse::PARAM_ILLEGAL);
         }
         $user = UserServices::getInstance()->getByUsername($username);
         if (empty($user)) {
@@ -158,7 +158,7 @@ class AuthController extends WxController
         $code = $request->input('code');
 
         if (is_null($password) || is_null($mobile) || is_null($code)) {
-            return $this->fail(CodeResponse::BADARGUMENT);
+            return $this->fail(CodeResponse::PARAM_ILLEGAL);
         }
 
         if ($code != Cache::get('register_captcha_' . $mobile)) {
@@ -185,7 +185,7 @@ class AuthController extends WxController
         $code = $request->input('code');
 
         if (is_null($password) || is_null($mobile) || is_null($code)) {
-            return $this->fail(CodeResponse::BADARGUMENT);
+            return $this->fail(CodeResponse::PARAM_ILLEGAL);
         }
 
         if ($code != Cache::get('register_captcha_' . $mobile)) {
