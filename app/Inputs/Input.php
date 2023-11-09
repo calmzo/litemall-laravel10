@@ -4,12 +4,12 @@ namespace App\Inputs;
 
 use App\Exceptions\BusinessException;
 use App\Utils\CodeResponse;
-use App\VerifyRequestInpuit;
+use App\ValidateRequest;
 use Illuminate\Support\Facades\Validator;
 
 class Input
 {
-    use VerifyRequestInpuit;
+    use ValidateRequest;
 
     /**
      * @param  null|array  $data

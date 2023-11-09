@@ -4,14 +4,15 @@ namespace App\Http\Controllers\Wx;
 
 use App\Http\Controllers\Controller;
 use App\Utils\CodeResponse;
-use App\VerifyRequestInpuit;
+use App\ValidateRequest;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 
 class WxController extends Controller
 {
-    use VerifyRequestInpuit;
+    use ValidateRequest;
+
     protected $only;
     protected $except;
 

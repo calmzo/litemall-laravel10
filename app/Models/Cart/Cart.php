@@ -43,4 +43,8 @@ use App\Models\BaseModel;
 class Cart extends BaseModel
 {
     public $fillable = [];
+    public $casts = [
+        'specifications' => 'array',
+        'price'          => 'double'
+    ];
 }

@@ -35,13 +35,11 @@ class GoodsProduct extends BaseModel
 {
     use HasFactory;
 
-//    protected $table = 'goods_product';
-
     protected $fillable = [];
 
     protected $casts = [
         'specifications' => 'array',
-        'price' => 'float',
+        'price'          => 'float'
 
     ];
 

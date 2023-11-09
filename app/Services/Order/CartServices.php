@@ -192,7 +192,7 @@ class CartServices extends BaseServices
      * @throws BusinessException
      * 获取商品的信息
      */
-    public function getGoodInfo($goodsId, $productId)
+    public function getGoodInfo($goodsId, $productId): array
     {
         $goods = GoodsServices::getInstance()->getGoods($goodsId);
 

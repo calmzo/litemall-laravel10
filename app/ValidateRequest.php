@@ -3,12 +3,23 @@
 namespace App;
 
 use App\Exceptions\BusinessException;
-use App\Utils\CodeResponse;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
-trait VerifyRequestInpuit
+trait ValidateRequest
 {
+
+    /**
+     * @param $key
+     * @param  null  $default
+     * @return array|mixed|null
+     * @throws BusinessException
+     * 验证数组
+     */
+    public function verifyArrayNotEmpty($key, $default = null)
+    {
+        return $this->verifyData($key, $default, 'array|min:1');
+    }
 
     /**
      * @param $key
@@ -18,9 +29,8 @@ trait VerifyRequestInpuit
      */
     public function verifyId($key, $default = null)
     {
-        return $this->verifyData($key, $default, 'required|integer|digits_between:1,20');
+        return $this->verifyData($key, $default, 'integer | digits_between:1,20 | min:1');
     }
-
 
     /**
      * @param $key
@@ -33,22 +43,9 @@ trait VerifyRequestInpuit
         return $this->verifyData($key, $default, 'string');
     }
 
-
     /**
      * @param $key
-     * @param  null  $default
-     * @return array|mixed|null
-     * @throws BusinessException
-     */
-    public function verifyBoolean($key, $default = null)
-    {
-        return $this->verifyData($key, $default, 'boolean');
-    }
-
-
-    /**
-     * @param $key
-     * @param  null  $default
+     * @param $default
      * @return array|mixed|null
      * @throws BusinessException
      */
@@ -69,6 +66,17 @@ trait VerifyRequestInpuit
         return $this->verifyData($key, $default, Rule::in($enum));
     }
 
+    /**
+     * @param $key
+     * @param  null  $default
+     * @return array|mixed|null
+     * @throws BusinessException
+     */
+    public function verifyBoolean($key, $default = null)
+    {
+        return $this->verifyData($key, $default, 'boolean');
+    }
+
 
     /**
      * @param $key
@@ -77,16 +85,15 @@ trait VerifyRequestInpuit
      * @return array|mixed|null
      * @throws BusinessException
      */
-    public function verifyData($key, $default, $rule)
+    private function verifyData($key, $default, $rule)
     {
-        $value = request()->input($key, $default);
-        $validator = Validator::make([$key => $value], [$key => $rule]);
-//        if (is_null($default) && is_null($value)) {
-//            return $value;
-//        }
-        if ($validator->fails()) {
-//            throw new BusinessException(CodeResponse::PARAM_NOT_EMPTY, $validator->errors()->first());
-            throw new BusinessException(CodeResponse::PARAM_NOT_EMPTY, $validator->errors());
+        $value    = request()->input($key, $default);
+        $validate = Validator::make([$key => $value], [$key => $rule]);
+        if (is_null($value) && is_null($default)) {
+            return null;
+        }
+        if ($validate->fails()) {
+            throw new BusinessException(CodeResponse::PARAM_NOT_EMPTY);
         }
         return $value;
     }
