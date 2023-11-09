@@ -45,6 +45,7 @@ class Cart extends BaseModel
     public $fillable = [];
     public $casts = [
         'specifications' => 'array',
-        'price'          => 'double'
+        'price'          => 'double',
+        'checked'        => 'boolean'
     ];
 }

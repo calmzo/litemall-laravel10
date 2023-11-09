@@ -136,4 +136,61 @@ class CartTest extends TestCase
         ], $this->authHeader);
         $resp->assertJson(["errno" => 402, "errmsg" => "参数值不对"]);
     }
+
+    public function testChecked()
+    {
+        $resp = $this->post('wx/cart/add', [
+            'goodsId' => $this->production->goods_id,
+            'productId' => $this->production->id,
+            'number' => 2,
+        ], $this->authHeader);
+        $resp->assertJson(["errno" => 0, "data" => "2", "errmsg" => "成功"]);
+
+        $cart = CartServices::getInstance()->getCartProduct($this->user->id,
+            $this->production->id, $this->production->goods_id);
+        $this->assertTrue($cart->checked);
+
+        $resp = $this->post('wx/cart/checked', [
+            'productIds' => [$this->production->id],
+            'isChecked' => 0
+        ], $this->authHeader);
+
+        $cart = CartServices::getInstance()->getCartProduct($this->user->id,
+            $this->production->id, $this->production->goods_id);
+        $this->assertFalse($cart->checked);
+
+        $resp = $this->post('wx/cart/checked', [
+            'productIds' => [$this->production->id],
+            'isChecked' => 1
+        ], $this->authHeader);
+
+        $cart = CartServices::getInstance()->getCartProduct($this->user->id,
+            $this->production->id, $this->production->goods_id);
+        $this->assertTrue($cart->checked);
+
+    }
+
+    public function testFastAdd(){
+        $resp = $this->post('wx/cart/add', [
+            'goodsId' => $this->production->goods_id,
+            'productId' => $this->production->id,
+            'number' => 2,
+        ], $this->authHeader);
+        $resp->assertJson(["errno" => 0, "data" => "2", "errmsg" => "成功"]);
+
+        $resp = $this->post('wx/cart/fastadd', [
+            'goodsId' => $this->production->goods_id,
+            'productId' => $this->production->id,
+            'number' => 5,
+        ], $this->authHeader);
+        $resp->assertJson(["errno" => 0, "errmsg" => "成功"]);
+        $cart = CartServices::getInstance()->getCartProduct($this->user->id,
+            $this->production->id, $this->production->goods_id);
+
+        $this->assertEquals(5, $cart->number);
+
+        $resp->assertJson(["errno" => 0, "errmsg" => "成功", 'data' => $cart->id]);
+
+
+    }
 }

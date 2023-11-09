@@ -75,7 +75,7 @@ abstract class TestCase extends BaseTestCase
         $response1->assertStatus(200);
         $ret = $response1->getOriginalContent();
         $this->assertEquals('0', $ret['errno']);
-        echo $url . PHP_EOL;
+//        echo $url . PHP_EOL;
 //        $content1 = $response1->getContent();
 //        $content1 = json_encode(json_decode($content1, true), JSON_UNESCAPED_UNICODE);
 //        echo "calmshop => $content1" . PHP_EOL;
