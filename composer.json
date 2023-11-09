@@ -7,10 +7,12 @@
     "require": {
         "php": "^8.1",
         "guzzlehttp/guzzle": "^7.2",
+        "intervention/image": "^2.7",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
         "leonis/easysms-notification-channel": "^2.0",
+        "simplesoftwareio/simple-qrcode": "~4",
         "tymon/jwt-auth": "^2.0",
         "yansongda/laravel-pay": "~3.5.0"
     },

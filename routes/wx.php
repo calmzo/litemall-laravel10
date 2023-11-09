@@ -66,10 +66,10 @@ Route::prefix('share')->group(function () {
 });
 
 Route::prefix('home')->group(function () {
-    Route::get('home/redirectShareUrl', 'HomeController@redirectShareUrl')->name('redirectShareurl');
     Route::get('index', 'HomeController@index');
 });
 
+Route::get('home/redirectShareUrl', 'HomeController@redirectShareUrl')->name('home.redirectShareUrl');
 //订单模块--购物车
 Route::prefix('cart')->group(function () {
     Route::post('add', 'CartController@add');
