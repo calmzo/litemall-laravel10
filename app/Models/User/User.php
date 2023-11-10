@@ -53,6 +53,7 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @method static \Illuminate\Database\Eloquent\Builder|User whereUserLevel($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User whereUsername($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User whereWeixinOpenid($value)
+ * @method static \Database\Factories\User\UserFactory factory($count = null, $state = [])
  * @mixin \Eloquent
  */
 class User extends BaseModel implements JWTSubject, AuthenticatableContract,

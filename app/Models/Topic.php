@@ -37,4 +37,7 @@ namespace App\Models;
 class Topic extends BaseModel
 {
     public $fillable = [];
+
+    public $hidden = ['sort_order', 'goods', 'add_time', 'update_time', 'deleted'];
+
 }

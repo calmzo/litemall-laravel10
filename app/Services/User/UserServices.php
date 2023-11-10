@@ -31,7 +31,12 @@ class UserServices extends BaseServices
         return User::query()->where('mobile', $mobile)->first();
     }
 
-    public function getById($id)
+    /**
+     * @param $id
+     * @return User|User[]|Builder|Builder[]|Collection|Model|null
+     * 根据用户ID,获取用户的信息
+     */
+    public function getUserById($id)
     {
         return User::query()->find($id);
     }

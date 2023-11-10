@@ -38,6 +38,7 @@ use App\Models\BaseModel;
  * @method static \Illuminate\Database\Eloquent\Builder|Address whereTel($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Address whereUpdateTime($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Address whereUserId($value)
+ * @method static \Database\Factories\User\AddressFactory factory($count = null, $state = [])
  * @mixin \Eloquent
  */
 class Address extends BaseModel

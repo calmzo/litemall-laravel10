@@ -32,6 +32,7 @@ use App\Models\BaseModel;
  * @method static \Illuminate\Database\Eloquent\Builder|GrouponRules wherePicUrl($value)
  * @method static \Illuminate\Database\Eloquent\Builder|GrouponRules whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder|GrouponRules whereUpdateTime($value)
+ * @method static \Database\Factories\Promotion\GrouponRulesFactory factory($count = null, $state = [])
  * @mixin \Eloquent
  */
 class GrouponRules extends BaseModel

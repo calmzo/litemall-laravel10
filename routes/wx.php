@@ -109,3 +109,19 @@ Route::prefix('collect')->group(function () {
     Route::any('list', 'CollectController@getList'); //收藏列表
     Route::any('addordelete', 'CollectController@addOrDelete'); //添加或取消收藏
 });
+
+//意见反馈
+Route::prefix('feedback')->group(function () {
+    Route::post('submit', 'FeedbackController@submit');
+});
+
+//常见问题
+Route::prefix('issue')->group(function () {
+    Route::get('list', 'IssueController@getList');
+});
+
+Route::prefix('topic')->group(function () {
+    Route::get('list', 'TopicController@getList');
+    Route::get('detail', 'TopicController@getDetail');
+    Route::get('related', 'TopicController@getRelated');
+});

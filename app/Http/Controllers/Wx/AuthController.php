@@ -180,25 +180,22 @@ class AuthController extends WxController
      */
     public function resetPhone(Request $request)
     {
-        $password = $request->input('password');
-        $mobile = $request->input('mobile');
-        $code = $request->input('code');
+        $mobile   = $this->verifyString('mobile');
+        $code     = $this->verifyString('code');
+        $password = $this->verifyString('password');
 
-        if (is_null($password) || is_null($mobile) || is_null($code)) {
-            return $this->fail(CodeResponse::PARAM_ILLEGAL);
+        $isPass   = UserServices::getInstance()->checkCaptcha($mobile, $code);
+        if (!$isPass) {
+            return $this->fail(CodeResponse::AUTH_CAPTCHA_UNMATCH);
         }
 
-        if ($code != Cache::get('register_captcha_' . $mobile)) {
-            return $this->fail(CodeResponse::AUTH_CAPTCHA_UNMATCH, '验证码错误');
+        $user = UserServices::getInstance()->getByMobile($mobile);
+        if (is_null($user)) {
+            return $this->fail(CodeResponse::AUTH_MOBILE_UNREGISTERED);
         }
-        $useByMobile = UserServices::getInstance()->getByMobile($mobile);
-        if ($useByMobile) {
-            return $this->fail(CodeResponse::AUTH_NAME_REGISTERED, '手机号已注册');
-        }
-        $user = Auth::user();
-        $user->mobile = $mobile;
-        $user->save();
-        return $this->success();
+        $password       = Hash::make($password);
+        $user->password = $password;
+        return $user->save() ? $this->success() : $this->fail(CodeResponse::UPDATED_FAIL);
     }
 
     /**
@@ -206,23 +203,25 @@ class AuthController extends WxController
      */
     public function profile(Request $request)
     {
-        $id = Auth::user()->id;
-        $avatar = $request->input('avatar');
-        $gender = $request->input('gender');
-        $nickname = $request->input('nickname');
+        $nickname = $this->verifyString('nickname', null);
+        $avatar   = $this->verifyString('avatar', null);
+        $gender   = $this->verifyString('gender', null);
 
-        $user = UserServices::getInstance()->getById($id);
-        if (!is_null($avatar)) {
-            $user->avatar = $avatar;
-        }
-        if (!is_null($gender)) {
-            $user->gender = $gender;
-        }
-        if (!is_null($nickname)) {
+        /** @var User $user */
+        $user = $this->user();
+        if (!empty($nickname)) {
             $user->nickname = $nickname;
         }
-        $user->save();
-        return $this->success();
+
+        if (!empty($avatar)) {
+            $user->avatar = $avatar;
+        }
+
+        if (!empty($gender)) {
+            $user->gender = $gender;
+        }
+
+        return $user->save() ? $this->success() : $this->fail(CodeResponse::UPDATED_FAIL);
     }
 
 

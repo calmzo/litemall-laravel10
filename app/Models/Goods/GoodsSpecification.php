@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @method static \Illuminate\Database\Eloquent\Builder|GoodsSpecification whereSpecification($value)
  * @method static \Illuminate\Database\Eloquent\Builder|GoodsSpecification whereUpdateTime($value)
  * @method static \Illuminate\Database\Eloquent\Builder|GoodsSpecification whereValue($value)
+ * @method static \Database\Factories\Goods\GoodsSpecificationFactory factory($count = null, $state = [])
  * @mixin \Eloquent
  */
 class GoodsSpecification extends BaseModel

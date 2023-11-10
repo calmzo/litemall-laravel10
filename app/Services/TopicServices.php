@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Input\PageInput;
+use App\Inputs\PageInput;
 use App\Models\Topic;
 use App\Services\Goods\GoodsServices;
 use Illuminate\Database\Concerns\BuildsQueries;

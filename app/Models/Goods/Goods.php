@@ -53,6 +53,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @method static \Illuminate\Database\Eloquent\Builder|Goods whereSortOrder($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Goods whereUnit($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Goods whereUpdateTime($value)
+ * @method static \Database\Factories\Goods\GoodsFactory factory($count = null, $state = [])
  * @mixin \Eloquent
  */
 class Goods extends BaseModel
