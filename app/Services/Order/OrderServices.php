@@ -25,6 +25,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\NewPaidOrderEmailNotify;
 
 class OrderServices extends BaseServices
 {
@@ -449,6 +451,332 @@ class OrderServices extends BaseServices
             }
         }
     }
+
+    /**
+     * @param  array  $orderIds
+     * @return OrderGoods[]|Builder[]|Collection|\Illuminate\Database\Query\Builder[]|\Illuminate\Support\Collection|\think\Collection
+     * 根据订单id，获取商品订单列表
+     */
+    public function getOrderGoodsListsByOrderIds(array $orderIds)
+    {
+        if (empty($orderIds)) {
+            return collect([]);
+        }
+        return OrderGoods::query()->whereIn('order_id', $orderIds)->get();
+    }
+
+    /**
+     * @param $userId
+     * @param $orderId
+     * @param $shipSn
+     * @param $shipChannel
+     * @return Order|Order[]|Builder|Builder[]|Collection|Model|null
+     * @throws BusinessException
+     * @throws Throwable
+     * 订单发货
+     */
+    public function ship($userId, $orderId, $shipSn, $shipChannel)
+    {
+        $order = $this->getOrderByUserIdAndId($userId, $orderId);
+
+        if (empty($order)) {
+            $this->throwBusinessException();
+        }
+
+        if (!$order->canShipHandle()) {
+            $this->throwBusinessException(CodeResponse::ORDER_INVALID_OPERATION, '该订单不能发货');
+        }
+
+        $order->order_status = Constant::ORDER_STATUS_SHIP;
+        $order->ship_sn      = $shipSn;
+        $order->ship_channel = $shipChannel;
+        $order->ship_time    = now()->toDateTimeString();
+
+        if ($order->cas() == 0) {
+            $this->throwBusinessException(CodeResponse::UPDATED_FAIL);
+        }
+        //todo 发通知给用户
+        return $order;
+    }
+
+    /**
+     * @param  Order  $order
+     * @param $refundType
+     * @param $refundContent
+     * @return Order
+     * @throws BusinessException
+     * @throws Throwable
+     * 管理员同意退款
+     */
+    public function agreeRefund(Order $order, $refundType, $refundContent)
+    {
+        if (!$order->canAgreeRefundHandle()) {
+            $this->throwBusinessException(CodeResponse::ORDER_INVALID_OPERATION, '该订单不能同意退款');
+        }
+        $now                   = now()->toDateTimeString();
+        $order->order_status   = Constant::ORDER_STATUS_REFUND_CONFIRM;
+        $order->end_time       = $now;
+        $order->refund_amount  = $order->actual_price;
+        $order->refund_type    = $refundType;
+        $order->refund_content = $refundContent;
+        $order->refund_time    = $now;
+
+        if ($order->cas() == 0) {
+            $this->throwBusinessException(CodeResponse::UPDATED_FAIL);
+        }
+
+        //增加库存
+        $this->addProductStock($order->id);
+        return $order;
+    }
+
+
+    /**
+     * @return Order[]|Builder[]|Collection
+     * 获取超时未收货的订单
+     */
+    public function getTimeUnConfirmOrders()
+    {
+        $days = SystemServices::getInstance()->getUnConfirmOrderTime();
+        return Order::query()->where('order_status', Constant::ORDER_STATUS_SHIP)
+            ->where('ship_time', '<=', now()->subDays($days))
+            ->where('ship_time', '>=', now()->subDays($days + 30))
+            ->get();
+    }
+
+    /**
+     * @throws BusinessException
+     * @throws Throwable
+     * 自动确认收货
+     */
+    public function autoConfirm()
+    {
+        $orders = $this->getTimeUnConfirmOrders();
+        foreach ($orders as $order) {
+            $this->confirm($order->user_id, $order->id, true);
+        }
+    }
+
+    /**
+     * @param  Order  $order
+     * @param $payId
+     * @return Order
+     * @throws BusinessException
+     * @throws Throwable 支付成功，处理订单
+     */
+    public function payOrder(Order $order, $payId)
+    {
+        if (!$order->canPayHandle()) {
+            $this->throwBusinessException(CodeResponse::ORDER_PAY_FAIL, '订单不能被支付');
+        }
+        $order->pay_id       = $payId;
+        $order->pay_time     = now()->toDateTimeString();
+        $order->order_status = Constant::ORDER_STATUS_PAY;
+        if ($order->cas() == 0) {
+            $this->throwBusinessException(CodeResponse::UPDATED_FAIL);
+        }
+
+        //处理团购订单
+        GrouponServices::getInstance()->payGrouponOrder($order->id);
+
+        //发送邮箱给管理员
+        Notification::route('mail', env('MAIL_USERNAME'))->notify(new NewPaidOrderEmailNotify($order->id));
+
+        //发送短信给用户--自行申请短信测试模板
+//        $code = random_int(100000, 999999);
+//        $user = UserServices::getInstance()->getUserById($order->user_id);
+//        $user->mobile = '18656275932';
+//        $user->notify(new NewPaidOrderSmsNotify($code, 'SMS_117526525'));
+        return $order;
+    }
+
+    /**
+     * @param $userId
+     * @param $orderId
+     * @return bool
+     * @throws Throwable
+     * 管理员取消订单
+     */
+    public function adminCancel($userId, $orderId)
+    {
+        DB::transaction(function () use ($userId, $orderId) {
+            $this->cancel($userId, $orderId, 'admin');
+        });
+        return true;
+    }
+
+    /**
+     * @param $userId
+     * @param $orderId
+     * @return bool
+     * @throws Throwable
+     * 系统取消订单
+     */
+    public function systemCancel($userId, $orderId)
+    {
+        var_dump('111');
+        DB::transaction(function () use ($userId, $orderId) {
+            $this->cancel($userId, $orderId, 'system');
+        });
+        return true;
+    }
+
+    /**
+     * @param $userId
+     * @param $orderId
+     * @param $status
+     * @return bool|int
+     * 修改订单的状态
+     */
+    public function updateOrderStatus($userId, $orderId, $status)
+    {
+        return Order::query()->where('user_id', $userId)->where('id', $orderId)->update(['order_status' => $status]);
+    }
+
+    /**
+     * @param $userId
+     * @param $orderId
+     * @return array
+     * @throws BusinessException
+     * 获取微信支付前订单数据
+     */
+    public function getPayWxOrder($userId, $orderId)
+    {
+        $order = $this->getPayOrderInfo($userId, $orderId);
+        return $order = [
+            'out_trade_no' => $order->order_sn,
+            'body'         => '订单：' . $order->order_sn,
+            'total_fee'    => bcmul($order->actual_price, 100, 2),
+        ];
+    }
+
+    /**
+     * @param $userId
+     * @param $orderId
+     * @return Order|Order[]|Builder|Builder[]|Collection|Model|null
+     * @throws BusinessException
+     * 获取订单支付信息
+     */
+    public function getPayOrderInfo($userId, $orderId)
+    {
+        $order = $this->getOrderByUserIdAndId($userId, $orderId);
+        if (empty($order)) {
+            $this->throwBusinessException(CodeResponse::ORDER_UNKNOWN);
+        }
+        return $order;
+    }
+
+    /**
+     * @param $userId
+     * @param $orderId
+     * @return array
+     * @throws BusinessException
+     * 获取支付宝支付订单信息
+     */
+    public function getAlipayPayOrder($userId, $orderId)
+    {
+        $order = $this->getPayOrderInfo($userId, $orderId);
+        return [
+            'out_trade_no' => $order->order_sn,
+            'total_amount' => $order->actual_price,
+            'subject'      => 'test subject - 测试'
+        ];
+    }
+
+    /**
+     * @param $data
+     * @return Order|Builder|Model|object|null
+     * @throws BusinessException
+     * @throws Throwable
+     * 微信支付回调
+     */
+    public function wxNotify($data)
+    {
+        //记录微信支付回调通知的关键数据
+        Log::debug('WxNotify data:' . var_export_inline($data));
+        $orderSn = $data['out_trade_no'] ?? '';
+        $payId   = $data['transaction_id'] ?? '';
+        $price   = bcdiv($data['total_price'], 100, 2);
+        return $this->notify($price, $orderSn, $payId);
+    }
+
+
+    /**
+     * @param $price
+     * @param $orderSn
+     * @param $payId
+     * @return Order|Builder|Model|object|null
+     * @throws BusinessException
+     * @throws Throwable
+     * 支付成功后修改订单状态和数据
+     */
+    public function notify($price, $orderSn, $payId)
+    {
+        $order = $this->getOrderByOrderSn($orderSn);
+        if (is_null($order)) {
+            $this->throwBusinessException(CodeResponse::ORDER_UNKNOWN);
+        }
+        if ($order->isHadPaid()) {
+            return $order;
+        }
+
+        if (bccomp($order->actual_price, $price, 2) != 0) {
+            Log::error("支付回调，订单{$order->id}金额不一致，请检查，支付回调金额：{$price}，订单金额：{$order->actual_price}");
+            $this->throwBusinessException(CodeResponse::FAIL, '订单金额有问题，请检查');
+        }
+        return $this->payOrder($order, $payId);
+    }
+
+    /**
+     * @param $data
+     * @return Order|Builder|Model|object|null
+     * @throws BusinessException
+     * @throws Throwable
+     * 支付宝支付回调
+     */
+    public function alipayNotify($data)
+    {
+        if (!in_array(($data['trade_status'] ?? ''), ['TRADE_SUCCESS', 'TRADE_FINISHED'])) {
+            $this->throwBusinessException();
+        }
+        $orderSn = $data['out_trade_no'] ?? '';
+        $payId   = $data['transaction_id'] ?? '';
+        $price   = $data['total_amount'] ?? 0;
+        return $this->notify($price, $orderSn, $payId);
+    }
+
+
+    /**
+     * @param $orderSn
+     * @return Order|Builder|Model|object|null
+     * 根据订单编号获取订单数据
+     */
+    public function getOrderByOrderSn($orderSn)
+    {
+        return Order::query()->whereOrderSn($orderSn)->first();
+    }
+    /**
+     * @param $orderSn
+     * @return bool
+     * 检查订单号是否有效
+     */
+    private function checkOrderSnValid($orderSn)
+    {
+        return Order::query()->where('order_sn', $orderSn)->exists();
+    }
+
+
+    /**
+     * @param $userId
+     * @return Order[]|Builder[]|Collection
+     * 获取用户的所有订单
+     */
+    public function getOrdersByUserId($userId)
+    {
+        return Order::query()->whereUserId($userId)->get();
+    }
+
+
 
 }
 
