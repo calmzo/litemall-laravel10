@@ -103,3 +103,9 @@ Route::prefix('address')->group(function () {
     Route::post('save', 'AddressController@save');
     Route::post('delete', 'AddressController@delete');
 });
+
+//收藏
+Route::prefix('collect')->group(function () {
+    Route::any('list', 'CollectController@getList'); //收藏列表
+    Route::any('addordelete', 'CollectController@addOrDelete'); //添加或取消收藏
+});
