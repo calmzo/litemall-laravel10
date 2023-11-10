@@ -35,8 +35,9 @@ class OrderController extends WxController
      */
     public function h5pay()
     {
-        $order = OrderServices::getInstance()->h5payOrder();
-        return Pay::alipay()->wap($order);
+        $orderId = $this->verifyId('orderId');
+        $order   = OrderServices::getInstance()->getPayWxOrder($this->userId(), $orderId);
+        return Pay::wechat()->wap($order);
     }
 
     /**

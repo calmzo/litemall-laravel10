@@ -50,7 +50,7 @@ Route::prefix('goods')->group(function () {
 });
 
 Route::prefix('order')->group(function () {
-    Route::get('h5pay', 'OrderController@h5pay');
+    Route::post('h5pay', 'OrderController@h5pay');
     Route::any('list', 'OrderController@list');
     Route::any('detail', 'OrderController@detail');
     Route::any('submit', 'OrderController@submit');
@@ -94,4 +94,12 @@ Route::prefix('coupon')->group(function () {
 Route::prefix('groupon')->group(function () {
     Route::get('list', 'GrouponController@list');
     Route::get('test', 'GrouponController@test');
+});
+
+
+//用户模块--地址
+Route::prefix('address')->group(function () {
+    Route::get('list', 'AddressController@list');
+    Route::post('save', 'AddressController@save');
+    Route::post('delete', 'AddressController@delete');
 });

@@ -3,7 +3,7 @@
 namespace App\Models;
 
 /**
- * @method static static|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder withTrashed(bool $withTrashed = true)
+ * @method static static|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder withTrashed()
  * @method static static|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder onlyTrashed()
  * @method static static|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder withoutTrashed()
  */
@@ -23,9 +23,8 @@ trait BooleanSoftDeletes
      */
     public static function bootBooleanSoftDeletes()
     {
-        static::addGlobalScope(new BooleanSoftDeletingScope());
+        static::addGlobalScope(new BooleanSoftDeletingScope);
     }
-
 
     /**
      * Force a hard delete on a soft deleted model.
@@ -76,7 +75,7 @@ trait BooleanSoftDeletes
 
         $this->{$this->getDeletedAtColumn()} = 1;
 
-        if ($this->timestamps && ! is_null($this->getUpdatedAtColumn())) {
+        if ($this->timestamps && !is_null($this->getUpdatedAtColumn())) {
             $this->{$this->getUpdatedAtColumn()} = $time;
 
             $columns[$this->getUpdatedAtColumn()] = $this->fromDateTime($time);
@@ -85,8 +84,6 @@ trait BooleanSoftDeletes
         $query->update($columns);
 
         $this->syncOriginalAttributes(array_keys($columns));
-
-        $this->fireModelEvent('trashed', false);
     }
 
     /**
@@ -125,18 +122,6 @@ trait BooleanSoftDeletes
     public function trashed()
     {
         return $this->{$this->getDeletedAtColumn()} == 1;
-//        return ! is_null($this->{$this->getDeletedAtColumn()});
-    }
-
-    /**
-     * Register a "softDeleted" model event callback with the dispatcher.
-     *
-     * @param  \Closure|string  $callback
-     * @return void
-     */
-    public static function softDeleted($callback)
-    {
-        static::registerModelEvent('trashed', $callback);
     }
 
     /**
@@ -189,8 +174,19 @@ trait BooleanSoftDeletes
      */
     public function getDeletedAtColumn()
     {
-        return defined('static::DELETED_AT') ? static::DELETED_AT : 'deleted';
+        return 'deleted';
     }
+
+    /**
+     * Get the name of the "updated at" column.
+     *
+     * @return string
+     */
+    public function getUpdatedAtColumn()
+    {
+        return 'update_time';
+    }
+
 
     /**
      * Get the fully qualified "deleted at" column.

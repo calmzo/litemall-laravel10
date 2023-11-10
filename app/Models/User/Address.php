@@ -43,4 +43,8 @@ use App\Models\BaseModel;
 class Address extends BaseModel
 {
     public $fillable = [];
+
+    protected $casts = [
+        'is_default' => 'boolean',
+    ];
 }

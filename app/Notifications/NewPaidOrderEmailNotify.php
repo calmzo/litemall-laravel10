@@ -7,17 +7,19 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class NewPaidOrderEmailNotify extends Notification
+class NewPaidOrderEmailNotify extends Notification implements ShouldQueue
 {
     use Queueable;
 
+    private $orderId;
+
     /**
-     * Create a new notification instance.
-     *
-     * @return void
+     * NewPaidOrderEmailNotify constructor.
+     * @param $orderId
      */
-    public function __construct()
+    public function __construct($orderId)
     {
+        $this->orderId = $orderId;
         //
     }
 
@@ -36,14 +38,15 @@ class NewPaidOrderEmailNotify extends Notification
      * Get the mail representation of the notification.
      *
      * @param  mixed  $notifiable
-     * @return \Illuminate\Notifications\Messages\MailMessage
+     * @return MailMessage
      */
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+            ->subject('新订单通知')
+            ->line('您有新的订单哦，请注意查看')
+            ->line("订单：" . $this->orderId)
+            ->action('去发货', url('/'));
     }
 
     /**

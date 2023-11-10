@@ -102,4 +102,20 @@ class User extends BaseModel implements JWTSubject, AuthenticatableContract,
             'userId' => $this->getKey()
         ];
     }
+
+    protected static function booted()
+    {
+        static::cased(function ($user) {
+            echo 'cased' . PHP_EOL;
+        });
+
+        static::casing(function ($user) {
+            echo 'casing' . PHP_EOL;
+        });
+    }
+
+    public function routeNotificationForEasySms($driver, $notification = null)
+    {
+        return $this->mobile;
+    }
 }

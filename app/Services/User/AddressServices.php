@@ -3,7 +3,7 @@
 namespace App\Services\User;
 
 use App\Exceptions\BusinessException;
-use App\Input\AddressSaveInput;
+use App\Inputs\AddressSaveInput;
 use App\Models\User\Address;
 use App\Services\BaseServices;
 use App\Utils\CodeResponse;
@@ -60,7 +60,7 @@ class AddressServices extends BaseServices
         $address->area_code      = $input->areaCode;
         $address->city           = $input->city;
         $address->county         = $input->county;
-        $address->is_default     = $input->isDefault;
+        $address->is_default     = $input->isDefault ? 1: 0;
         $address->name           = $input->name;
         $address->postal_code    = $input->postalCode;
         $address->province       = $input->province;

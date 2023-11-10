@@ -11,7 +11,7 @@ class BooleanSoftDeletingScope implements Scope
     /**
      * All of the extensions to be added to the builder.
      *
-     * @var string[]
+     * @var array
      */
     protected $extensions = ['Restore', 'WithTrashed', 'WithoutTrashed', 'OnlyTrashed'];
 
@@ -25,7 +25,6 @@ class BooleanSoftDeletingScope implements Scope
     public function apply(Builder $builder, Model $model)
     {
         $builder->where($model->getQualifiedDeletedAtColumn(), 0);
-//        $builder->whereNull($model->getQualifiedDeletedAtColumn());
     }
 
     /**
@@ -88,7 +87,7 @@ class BooleanSoftDeletingScope implements Scope
     protected function addWithTrashed(Builder $builder)
     {
         $builder->macro('withTrashed', function (Builder $builder, $withTrashed = true) {
-            if (! $withTrashed) {
+            if (!$withTrashed) {
                 return $builder->withoutTrashed();
             }
 

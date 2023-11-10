@@ -43,4 +43,8 @@ use App\Models\BaseModel;
 class OrderGoods extends BaseModel
 {
     public $fillable = [];
+    protected $casts = [
+        'price'          => 'float',
+        'specifications' => 'array'
+    ];
 }
