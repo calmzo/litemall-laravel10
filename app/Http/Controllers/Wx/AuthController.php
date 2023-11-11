@@ -77,28 +77,28 @@ class AuthController extends WxController
 
     public function login(Request $request)
     {
-        $username = $request->input('username');
-        $password = $request->input('password');
-        //参数验证
-        if (is_null($username) || is_null($password)) {
-            return $this->fail(CodeResponse::PARAM_ILLEGAL);
-        }
+        $username = $this->verifyString('username');
+        $password = $this->verifyId('password');
         $user = UserServices::getInstance()->getByUsername($username);
-        if (empty($user)) {
+
+        if (is_null($user)) {
             return $this->fail(CodeResponse::AUTH_INVALID_ACCOUNT);
         }
-        //验证密码
-        $is_pass = Hash::check($password, $user->password);
-        if (!$is_pass) {
-            return $this->fail(CodeResponse::AUTH_INVALID_ACCOUNT, '账号密码不对');
+
+        $isPass = Hash::check($password, $user->getAuthPassword());
+        if (!$isPass) {
+            return $this->fail(CodeResponse::AUTH_INVALID_ACCOUNT, '账号和密码不正确');
         }
-        //更新登录情况
-        $user->last_login_time = now();
-        $user->last_login_ip = $request->getClientIp();
+
+        $user->last_login_time = now()->toDateTimeString();
+        $user->last_login_ip   = $request->getClientIp();
+
         if (!$user->save()) {
             return $this->fail(CodeResponse::UPDATED_FAIL);
         }
-        $token = Auth::guard('wx')->login($user);
+
+        $token = Auth::login($user);
+
         return $this->success([
             'token' => $token,
             'userInfo' => [

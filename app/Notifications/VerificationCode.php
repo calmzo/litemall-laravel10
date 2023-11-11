@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notification;
 use Leonis\Notifications\EasySms\Channels\EasySmsChannel;
 use Leonis\Notifications\EasySms\Messages\EasySmsMessage;
 
-class VerifycationCode extends Notification
+class VerificationCode extends Notification
 {
     use Queueable;
     protected $code;
