@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
@@ -28,4 +29,20 @@ class Issue extends BaseModel
 {
     use HasFactory;
 
+    //定义访问器
+    public function question(): Attribute
+    {
+        return new Attribute(
+            get: fn($value) => $value,
+            set: fn($value) => $value
+        );
+    }
+
+    public function answer(): Attribute
+    {
+        return new Attribute(
+            get: fn($value) => $value,
+            set: fn($value) => $value
+        );
+    }
 }
