@@ -409,16 +409,22 @@ class OrderServices extends BaseServices
             $this->throwBusinessException(CodeResponse::ORDER_INVALID_OPERATION, '订单不能取消');
         }
 
-        switch ($role) {
-            case 'system':
-                $order->order_status = Constant::ORDER_STATUS_AUTO_CANCEL;
-                break;
-            case 'admin':
-                $order->order_status = Constant::ORDER_STATUS_ADMIN_CANCEL;
-                break;
-            default:
-                $order->order_status = Constant::ORDER_STATUS_CANCEL;
-        }
+//        switch ($role) {
+//            case 'system':
+//                $order->order_status = Constant::ORDER_STATUS_AUTO_CANCEL;
+//                break;
+//            case 'admin':
+//                $order->order_status = Constant::ORDER_STATUS_ADMIN_CANCEL;
+//                break;
+//            default:
+//                $order->order_status = Constant::ORDER_STATUS_CANCEL;
+//        }
+
+        $order->status = match ($role) {
+            'system' =>  Constant::ORDER_STATUS_AUTO_CANCEL,
+            'admin' => Constant::ORDER_STATUS_ADMIN_CANCEL,
+            default => Constant::ORDER_STATUS_CANCEL,
+        };
 
         if ($order->cas() === 0) {
             $this->throwBusinessException(CodeResponse::UPDATED_FAIL);
