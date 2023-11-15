@@ -7,9 +7,7 @@ use App\Inputs\AddressSaveInput;
 use App\Models\User\Address;
 use App\Services\BaseServices;
 use App\Utils\CodeResponse;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\{Builder, Collection, Model};
 
 class AddressServices extends BaseServices
 {

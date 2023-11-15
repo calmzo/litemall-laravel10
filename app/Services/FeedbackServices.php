@@ -3,10 +3,10 @@
 
 namespace App\Services;
 
-use App\Inputs\FeedbackSubmitInput;
-use App\Models\Feedback;
-use App\Services\User\UserServices;
-use App\Utils\CodeResponse;
+use App\Inputs\{FeedbackSubmitInput};
+use App\Models\{Feedback};
+use App\Services\User\{UserServices};
+use App\Utils\{CodeResponse};
 use Illuminate\Support\Facades\Date;
 
 class FeedbackServices extends BaseServices

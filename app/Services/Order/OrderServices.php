@@ -3,29 +3,21 @@
 namespace App\Services\Order;
 
 use App\Exceptions\BusinessException;
-use App\Inputs\OrderGoodsSubmit;
-use App\Inputs\PageInput;
+use App\Inputs\{OrderGoodsSubmit, PageInput};
 use App\Jobs\OverTimeCancelOrder;
-use App\Models\Cart\Cart;
-use App\Models\Goods\GoodsProduct;
-use App\Models\Order\Order;
-use App\Models\Order\OrderGoods;
+use App\Models\Cart\{Cart};
+use App\Models\Goods\{GoodsProduct};
+use App\Models\Order\{Order};
+use App\Models\Order\{OrderGoods};
 use App\Models\Promotion\Coupon;
-use App\Services\BaseServices;
-use App\Services\Goods\GoodsServices;
-use App\Services\Promotion\CouponServices;
-use App\Services\Promotion\GrouponServices;
-use App\Services\SystemServices;
-use App\Services\User\AddressServices;
-use App\Utils\CodeResponse;
-use App\Utils\Constant;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Notification;
+use App\Services\{BaseServices, SystemServices};
+use App\Services\Goods\{GoodsServices};
+use App\Services\Promotion\{CouponServices, GrouponServices};
+use App\Services\User\{AddressServices};
+use App\Utils\{CodeResponse, Constant};
+use Illuminate\Database\Eloquent\{Builder};
+use Illuminate\Support\{Arr, Collection, Str};
+use Illuminate\Support\Facades\{DB, Log, Notification};
 use App\Notifications\NewPaidOrderEmailNotify;
 
 class OrderServices extends BaseServices
@@ -36,15 +28,15 @@ class OrderServices extends BaseServices
         return [
             'out_trade_no' => time(),
             'total_amount' => '0.01',
-            'subject'      => 'test subject-测试订单',
+            'subject' => 'test subject-测试订单',
         ];
     }
 
     /**
      * @param $userId
-     * @param  PageInput  $page
+     * @param PageInput $page
      * @param $status
-     * @param  string[]  $column
+     * @param string[] $column
      * @return LengthAwarePaginator
      * 获取订单列表信息
      */
@@ -55,28 +47,30 @@ class OrderServices extends BaseServices
                 return $builder->whereIn('order_status', $status);
             })->orderBy($page->sort, $page->order)->paginate($page->limit, $column, 'page', $page->page);
     }
+
     public function coverOrder(Order $order, $grouponOrders, $goodsList)
     {
         return [
-            "id"              => $order->id,
-            "orderSn"         => $order->order_sn,
-            "actualPrice"     => $order->actual_price,
+            "id" => $order->id,
+            "orderSn" => $order->order_sn,
+            "actualPrice" => $order->actual_price,
             "orderStatusText" => Constant::ORDER_STATUS_TEXT_MAP[$order->order_status] ?? '',
-            "handleOption"    => $order->getCanHandleOptions(),
+            "handleOption" => $order->getCanHandleOptions(),
             "aftersaleStatus" => $order->aftersale_status,
-            "isGroupin"       => in_array($order->id, $grouponOrders),
-            "goodsList"       => $goodsList,
+            "isGroupin" => in_array($order->id, $grouponOrders),
+            "goodsList" => $goodsList,
         ];
     }
+
     public function coverOrderGoods(OrderGoods $orderGoods)
     {
         return [
-            "id"             => $orderGoods->id,
-            "goodsName"      => $orderGoods->goods_name,
-            "number"         => $orderGoods->number,
-            "picUrl"         => $orderGoods->pic_url,
+            "id" => $orderGoods->id,
+            "goodsName" => $orderGoods->goods_name,
+            "number" => $orderGoods->number,
+            "picUrl" => $orderGoods->pic_url,
             "specifications" => $orderGoods->specifications,
-            "price"          => $orderGoods->price
+            "price" => $orderGoods->price
         ];
     }
 
@@ -110,17 +104,17 @@ class OrderServices extends BaseServices
         ]);
 
         $detail['orderStatusText'] = Constant::ORDER_STATUS_TEXT_MAP[$order->order_status];
-        $detail['handleOption']    = $order->getCanHandleOptions();
+        $detail['handleOption'] = $order->getCanHandleOptions();
 
-        $goodsList         = $this->getOrderGoodList($orderId);
+        $goodsList = $this->getOrderGoodList($orderId);
         $detail['expCode'] = $order->ship_channel;
-        $detail['expNo']   = $order->ship_sn;
+        $detail['expNo'] = $order->ship_sn;
         $detail['expName'] = ExpressServices::getInstance()->getExpressName($order->ship_channel);
-        $express           = []; //todo
+        $express = []; //todo
 
         return [
-            'orderInfo'   => $detail,
-            'orderGoods'  => $goodsList,
+            'orderInfo' => $detail,
+            'orderGoods' => $goodsList,
             'expressInfo' => $express
         ];
     }
@@ -138,7 +132,7 @@ class OrderServices extends BaseServices
 
     /**
      * @param $orderId
-     * @param  string[]  $column
+     * @param string[] $column
      * @return OrderGoods[]|Builder[]|Collection
      * 获取订单商品的列表
      */
@@ -149,7 +143,7 @@ class OrderServices extends BaseServices
 
     /**
      * @param $userId
-     * @param  OrderGoodsSubmit  $input
+     * @param OrderGoodsSubmit $input
      * @return Order
      * @throws BusinessException
      */
@@ -167,16 +161,16 @@ class OrderServices extends BaseServices
         // 获取购物车的商品列表
         $checkedGoodList = CartServices::getInstance()->getCheckedGoodsList($userId, $input->cartId);
         // 计算商品的总价格（团购优惠金额，货品价格，优惠券优惠价格，运费）
-        $grouponPrice      = 0;
+        $grouponPrice = 0;
         $checkedGoodsPrice = CartServices::getInstance()->getCartPriceCutGroupon($checkedGoodList,
             $input->grouponRulesId, $grouponPrice);
         // 获取优惠券面额
         $couponPrice = 0;
         if ($input->couponId > 0) {
             /** @var Coupon $coupon */
-            $coupon     = CouponServices::getInstance()->getCoupon($input->couponId);
+            $coupon = CouponServices::getInstance()->getCoupon($input->couponId);
             $couponUser = CouponServices::getInstance()->getCouponUser($input->userCouponId);
-            $is         = CouponServices::getInstance()->checkCouponAndPrice($coupon, $couponUser, $checkedGoodsPrice);
+            $is = CouponServices::getInstance()->checkCouponAndPrice($coupon, $couponUser, $checkedGoodsPrice);
             if ($is) {
                 $couponPrice = $coupon->discount;
             }
@@ -188,21 +182,21 @@ class OrderServices extends BaseServices
         $orderTotalPrice = bcsub($orderTotalPrice, $couponPrice, 2);
         $orderTotalPrice = max(0, $orderTotalPrice);
         // 保存订单
-        $order                 = new Order();
-        $order->user_id        = $userId;
-        $order->order_sn       = $this->generateOrderSn();
-        $order->order_status   = Constant::ORDER_STATUS_CREATE;
-        $order->consignee      = $address->name;
-        $order->address        = $address->province . $address->city . $address->county . " " . $address->address_detail;
-        $order->message        = $input->message ?? " ";
-        $order->goods_price    = $checkedGoodsPrice;
-        $order->freight_price  = $freightPrice;
+        $order = new Order();
+        $order->user_id = $userId;
+        $order->order_sn = $this->generateOrderSn();
+        $order->order_status = Constant::ORDER_STATUS_CREATE;
+        $order->consignee = $address->name;
+        $order->address = $address->province . $address->city . $address->county . " " . $address->address_detail;
+        $order->message = $input->message ?? " ";
+        $order->goods_price = $checkedGoodsPrice;
+        $order->freight_price = $freightPrice;
         $order->integral_price = 0;
-        $order->mobile         = "";
-        $order->coupon_price   = $couponPrice;
-        $order->order_price    = $orderTotalPrice;
-        $order->actual_price   = $orderTotalPrice;
-        $order->groupon_price  = $grouponPrice;
+        $order->mobile = "";
+        $order->coupon_price = $couponPrice;
+        $order->order_price = $orderTotalPrice;
+        $order->actual_price = $orderTotalPrice;
+        $order->groupon_price = $grouponPrice;
         $order->save();
         // 写入订单商品记录（快照）
         $this->saveOrderGoods($checkedGoodList, $order->id);
@@ -227,7 +221,7 @@ class OrderServices extends BaseServices
     public function generateOrderSn()
     {
         return retry(5, function () {
-            $date    = date('YmdHis');
+            $date = date('YmdHis');
             $orderSn = $date . Str::random(6);
             if ($this->checkOrderSnValid($orderSn)) {
                 Log::warning("订单号获取失败：" . $orderSn);
@@ -246,29 +240,29 @@ class OrderServices extends BaseServices
     {
         /** @var Cart $cart */
         foreach ($checkedGoodList as $cart) {
-            $orderGoods                 = OrderGoods::new();
-            $orderGoods->order_id       = $orderId;
-            $orderGoods->goods_id       = $cart->goods_id;
-            $orderGoods->goods_sn       = $cart->goods_sn;
-            $orderGoods->product_id     = $cart->product_id;
-            $orderGoods->goods_name     = $cart->goods_name;
-            $orderGoods->pic_url        = $cart->pic_url;
-            $orderGoods->price          = $cart->price;
-            $orderGoods->number         = $cart->number;
+            $orderGoods = OrderGoods::new();
+            $orderGoods->order_id = $orderId;
+            $orderGoods->goods_id = $cart->goods_id;
+            $orderGoods->goods_sn = $cart->goods_sn;
+            $orderGoods->product_id = $cart->product_id;
+            $orderGoods->goods_name = $cart->goods_name;
+            $orderGoods->pic_url = $cart->pic_url;
+            $orderGoods->price = $cart->price;
+            $orderGoods->number = $cart->number;
             $orderGoods->specifications = $cart->specifications;
             $orderGoods->save();
         }
     }
 
     /**
-     * @param  Collection  $checkProductList
+     * @param Collection $checkProductList
      * @throws BusinessException
      * 减去库存，注意并发和重复请求的问题，即幂等性（对于同一个系统，多次重复请求的结果需要是一样的）
      */
     public function reduceProductsStock(Collection $checkProductList)
     {
         $productIds = $checkProductList->pluck('product_id')->toArray();
-        $products   = GoodsServices::getInstance()->getGoodsProductsByIds($productIds)->keyBy('id');
+        $products = GoodsServices::getInstance()->getGoodsProductsByIds($productIds)->keyBy('id');
         foreach ($checkProductList as $cart) {
             /** @var GoodsProduct $product */
             $product = $products->get($cart->product_id);
@@ -341,7 +335,7 @@ class OrderServices extends BaseServices
     /**
      * @param $userId
      * @param $orderId
-     * @param  false  $isAuto
+     * @param false $isAuto
      * @return Order|Order[]|Builder|Builder[]|Collection|Model|null
      * @throws BusinessException
      * @throws Throwable
@@ -359,7 +353,7 @@ class OrderServices extends BaseServices
             $this->throwBusinessException(CodeResponse::ORDER_INVALID_OPERATION, '该订单不能被确认收货');
         }
 
-        $order->comments     = $this->countOrderGoods($orderId);
+        $order->comments = $this->countOrderGoods($orderId);
         $order->order_status = $isAuto ? Constant::ORDER_STATUS_AUTO_CONFIRM : Constant::ORDER_STATUS_CONFIRM;
         $order->confirm_time = now()->toDateTimeString();
 
@@ -398,7 +392,7 @@ class OrderServices extends BaseServices
     /**
      * @param $userId
      * @param $orderId
-     * @param  string  $role  支持 user / admin / system
+     * @param string $role 支持 user / admin / system
      * @return bool
      * @throws BusinessException
      * 取消订单
@@ -453,7 +447,7 @@ class OrderServices extends BaseServices
     }
 
     /**
-     * @param  array  $orderIds
+     * @param array $orderIds
      * @return OrderGoods[]|Builder[]|Collection|\Illuminate\Database\Query\Builder[]|\Illuminate\Support\Collection|\think\Collection
      * 根据订单id，获取商品订单列表
      */
@@ -488,9 +482,9 @@ class OrderServices extends BaseServices
         }
 
         $order->order_status = Constant::ORDER_STATUS_SHIP;
-        $order->ship_sn      = $shipSn;
+        $order->ship_sn = $shipSn;
         $order->ship_channel = $shipChannel;
-        $order->ship_time    = now()->toDateTimeString();
+        $order->ship_time = now()->toDateTimeString();
 
         if ($order->cas() == 0) {
             $this->throwBusinessException(CodeResponse::UPDATED_FAIL);
@@ -500,7 +494,7 @@ class OrderServices extends BaseServices
     }
 
     /**
-     * @param  Order  $order
+     * @param Order $order
      * @param $refundType
      * @param $refundContent
      * @return Order
@@ -513,13 +507,13 @@ class OrderServices extends BaseServices
         if (!$order->canAgreeRefundHandle()) {
             $this->throwBusinessException(CodeResponse::ORDER_INVALID_OPERATION, '该订单不能同意退款');
         }
-        $now                   = now()->toDateTimeString();
-        $order->order_status   = Constant::ORDER_STATUS_REFUND_CONFIRM;
-        $order->end_time       = $now;
-        $order->refund_amount  = $order->actual_price;
-        $order->refund_type    = $refundType;
+        $now = now()->toDateTimeString();
+        $order->order_status = Constant::ORDER_STATUS_REFUND_CONFIRM;
+        $order->end_time = $now;
+        $order->refund_amount = $order->actual_price;
+        $order->refund_type = $refundType;
         $order->refund_content = $refundContent;
-        $order->refund_time    = $now;
+        $order->refund_time = $now;
 
         if ($order->cas() == 0) {
             $this->throwBusinessException(CodeResponse::UPDATED_FAIL);
@@ -558,7 +552,7 @@ class OrderServices extends BaseServices
     }
 
     /**
-     * @param  Order  $order
+     * @param Order $order
      * @param $payId
      * @return Order
      * @throws BusinessException
@@ -569,8 +563,8 @@ class OrderServices extends BaseServices
         if (!$order->canPayHandle()) {
             $this->throwBusinessException(CodeResponse::ORDER_PAY_FAIL, '订单不能被支付');
         }
-        $order->pay_id       = $payId;
-        $order->pay_time     = now()->toDateTimeString();
+        $order->pay_id = $payId;
+        $order->pay_time = now()->toDateTimeString();
         $order->order_status = Constant::ORDER_STATUS_PAY;
         if ($order->cas() == 0) {
             $this->throwBusinessException(CodeResponse::UPDATED_FAIL);
@@ -644,8 +638,8 @@ class OrderServices extends BaseServices
         $order = $this->getPayOrderInfo($userId, $orderId);
         return $order = [
             'out_trade_no' => $order->order_sn,
-            'body'         => '订单：' . $order->order_sn,
-            'total_fee'    => bcmul($order->actual_price, 100, 2),
+            'body' => '订单：' . $order->order_sn,
+            'total_fee' => bcmul($order->actual_price, 100, 2),
         ];
     }
 
@@ -678,7 +672,7 @@ class OrderServices extends BaseServices
         return [
             'out_trade_no' => $order->order_sn,
             'total_amount' => $order->actual_price,
-            'subject'      => 'test subject - 测试'
+            'subject' => 'test subject - 测试'
         ];
     }
 
@@ -694,8 +688,8 @@ class OrderServices extends BaseServices
         //记录微信支付回调通知的关键数据
         Log::debug('WxNotify data:' . var_export_inline($data));
         $orderSn = $data['out_trade_no'] ?? '';
-        $payId   = $data['transaction_id'] ?? '';
-        $price   = bcdiv($data['total_price'], 100, 2);
+        $payId = $data['transaction_id'] ?? '';
+        $price = bcdiv($data['total_price'], 100, 2);
         return $this->notify($price, $orderSn, $payId);
     }
 
@@ -739,8 +733,8 @@ class OrderServices extends BaseServices
             $this->throwBusinessException();
         }
         $orderSn = $data['out_trade_no'] ?? '';
-        $payId   = $data['transaction_id'] ?? '';
-        $price   = $data['total_amount'] ?? 0;
+        $payId = $data['transaction_id'] ?? '';
+        $price = $data['total_amount'] ?? 0;
         return $this->notify($price, $orderSn, $payId);
     }
 
@@ -754,6 +748,7 @@ class OrderServices extends BaseServices
     {
         return Order::query()->whereOrderSn($orderSn)->first();
     }
+
     /**
      * @param $orderSn
      * @return bool
@@ -774,7 +769,6 @@ class OrderServices extends BaseServices
     {
         return Order::query()->whereUserId($userId)->get();
     }
-
 
 
 }

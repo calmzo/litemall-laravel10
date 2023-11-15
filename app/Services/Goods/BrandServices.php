@@ -1,14 +1,11 @@
 <?php
 
 namespace App\Services\Goods;
-
+use Illuminate\Database\Eloquent\{Builder, Collection, Model};
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use App\Inputs\PageInput;
 use App\Models\Goods\Brand;
 use App\Services\BaseServices;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 
 class BrandServices extends BaseServices
 {

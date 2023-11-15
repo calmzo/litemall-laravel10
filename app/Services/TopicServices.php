@@ -5,9 +5,8 @@ namespace App\Services;
 use App\Inputs\PageInput;
 use App\Models\Topic;
 use App\Services\Goods\GoodsServices;
-use Illuminate\Database\Concerns\BuildsQueries;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Concerns\{BuildsQueries};
+use Illuminate\Database\Eloquent\{Builder, Collection};
 
 class TopicServices extends BaseServices
 {

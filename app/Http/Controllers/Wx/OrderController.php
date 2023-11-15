@@ -2,27 +2,20 @@
 
 namespace App\Http\Controllers\Wx;
 
+use App\Models\Order\{Order, OrderGoods};
+use App\Utils\{CodeResponse, Constant};
+use Illuminate\Support\Facades\{Cache, DB, Log};
+use Symfony\Component\HttpFoundation\{Response, RedirectResponse};
+use Yansongda\Pay\Exceptions\{InvalidArgumentException, InvalidConfigException, InvalidSignException};
 use App\Exceptions\BusinessException;
 use App\Inputs\OrderGoodsSubmit;
 use App\Inputs\PageInput;
-use App\Models\Order\Order;
-use App\Models\Order\OrderGoods;
 use App\Services\Order\OrderServices;
 use App\Services\Promotion\GrouponServices;
-use App\Utils\CodeResponse;
-use App\Utils\Constant;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Throwable;
 use Yansongda\LaravelPay\Facades\Pay;
-use Yansongda\Pay\Exceptions\InvalidArgumentException;
-use Yansongda\Pay\Exceptions\InvalidConfigException;
-use Yansongda\Pay\Exceptions\InvalidSignException;
 
 class OrderController extends WxController
 {
@@ -36,7 +29,7 @@ class OrderController extends WxController
     public function h5pay()
     {
         $orderId = $this->verifyId('orderId');
-        $order   = OrderServices::getInstance()->getPayWxOrder($this->userId(), $orderId);
+        $order = OrderServices::getInstance()->getPayWxOrder($this->userId(), $orderId);
         return Pay::wechat()->wap($order);
     }
 
@@ -48,7 +41,7 @@ class OrderController extends WxController
     public function h5alipay()
     {
         $orderId = $this->verifyId('orderId');
-        $order   = OrderServices::getInstance()->getAlipayPayOrder($this->userId(), $orderId);
+        $order = OrderServices::getInstance()->getAlipayPayOrder($this->userId(), $orderId);
         return Pay::alipay()->wap($order);
     }
 
@@ -59,12 +52,12 @@ class OrderController extends WxController
      */
     public function list()
     {
-        $page               = PageInput::new();
-        $showType           = $this->verifyEnum('showType', 0, array_keys(Constant::ORDER_SHOW_TYPE_STATUS_MAP));
-        $status             = Constant::ORDER_SHOW_TYPE_STATUS_MAP[$showType];
+        $page = PageInput::new();
+        $showType = $this->verifyEnum('showType', 0, array_keys(Constant::ORDER_SHOW_TYPE_STATUS_MAP));
+        $status = Constant::ORDER_SHOW_TYPE_STATUS_MAP[$showType];
         $orderListsWithPage = OrderServices::getInstance()->getOrderList($this->userId(), $page, $status);
-        $orderLists         = collect($orderListsWithPage->items());
-        $orderIds           = $orderLists->pluck('id')->toArray();
+        $orderLists = collect($orderListsWithPage->items());
+        $orderIds = $orderLists->pluck('id')->toArray();
 
         if (empty($orderIds)) {
             return $this->successPaginate($orderListsWithPage);
@@ -73,7 +66,7 @@ class OrderController extends WxController
         //准备数据
         $grouponOrderIds = GrouponServices::getInstance()->getGrouponOrderByOrderIds($orderIds);
         $orderGoodsLists = OrderServices::getInstance()->getOrderGoodsListsByOrderIds($orderIds)->groupBy('order_id');
-        $list            = $orderLists->map(function (Order $order) use ($grouponOrderIds, $orderGoodsLists) {
+        $list = $orderLists->map(function (Order $order) use ($grouponOrderIds, $orderGoodsLists) {
             /** @var Collection $goodsList */
             $goodsList = $orderGoodsLists->get($order->id);
             $goodsList = $goodsList->map(function (OrderGoods $orderGoods) {
@@ -94,7 +87,7 @@ class OrderController extends WxController
     public function detail()
     {
         $orderId = $this->verifyId('orderId');
-        $detail  = OrderServices::getInstance()->detail($this->userId(), $orderId);
+        $detail = OrderServices::getInstance()->detail($this->userId(), $orderId);
         return $this->success($detail);
     }
 
@@ -107,9 +100,9 @@ class OrderController extends WxController
     public function submit()
     {
         /** @var OrderGoodsSubmit $input */
-        $input    = OrderGoodsSubmit::new();
+        $input = OrderGoodsSubmit::new();
         $lock_key = sprintf("order_submit_%s_%s", $this->userId(), md5(serialize($input)));
-        $lock     = Cache::lock($lock_key);
+        $lock = Cache::lock($lock_key);
 
         //加上锁，防止重复请求
         if (!$lock->get()) {
@@ -124,7 +117,7 @@ class OrderController extends WxController
         $lock->release();
 
         return $this->success([
-            'orderId'       => $order->id,
+            'orderId' => $order->id,
             'grouponLikeId' => $input->grouponLinkId
         ]);
     }

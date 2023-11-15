@@ -3,12 +3,11 @@
 namespace App\Services\User;
 
 use App\Exceptions\BusinessException;
-use App\Models\User\User;
-use App\Services\BaseServices;
-use App\Utils\CodeResponse;
+use App\Models\User\{User};
+use App\Services\{BaseServices};
+use App\Utils\{CodeResponse};
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\{Cache, Notification};
 use Leonis\Notifications\EasySms\Channels\EasySmsChannel;
 use Overtrue\EasySms\PhoneNumber;
 use App\Notifications\VerificationCode;

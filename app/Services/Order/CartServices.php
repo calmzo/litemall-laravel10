@@ -1,27 +1,24 @@
 <?php
 
-
 namespace App\Services\Order;
-
 
 use App\Exceptions\BusinessException;
 use App\Models\Cart\Cart;
-use App\Models\Goods\Goods;
-use App\Models\Goods\GoodsProduct;
+use App\Models\Goods\{Goods, GoodsProduct};
 use App\Services\BaseServices;
-use App\Services\Goods\GoodsServices;
-use App\Services\Promotion\GrouponServices;
-use App\Utils\CodeResponse;
+use App\Services\Goods\{GoodsServices};
+use App\Services\Promotion\{GrouponServices};
+use App\Utils\{CodeResponse};
 use Exception;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\{Builder};
+use Illuminate\Database\Eloquent\{Collection};
+use Illuminate\Database\Eloquent\{Model};
 
 class CartServices extends BaseServices
 {
     /**
      * @param $userId
-     * @param  null  $cartId
+     * @param null $cartId
      * @return bool|mixed|null
      * @throws Exception
      * 清空购物车
@@ -44,17 +41,17 @@ class CartServices extends BaseServices
      */
     public function getCartPriceCutGroupon($checkGoodsLists, $grouponRulesId, &$grouponPrice)
     {
-        $grouponRules    = GrouponServices::getInstance()->getGrouponRuleById($grouponRulesId);
+        $grouponRules = GrouponServices::getInstance()->getGrouponRuleById($grouponRulesId);
         $checkGoodsPrice = 0;
         foreach ($checkGoodsLists as $cart) {
             /** @var Cart $cart */
             if ($grouponRules && $grouponRules->goods_id == $cart->goods_id) {
                 $grouponPrice = bcmul($grouponRules->discount, $cart->number, 2);
-                $price        = bcsub($cart->price, $grouponRules->discount, 2);
+                $price = bcsub($cart->price, $grouponRules->discount, 2);
             } else {
                 $price = $cart->price;
             }
-            $price           = bcmul($price, $cart->number, 2);
+            $price = bcmul($price, $cart->number, 2);
             $checkGoodsPrice = bcadd($checkGoodsPrice, $price, 2);
         }
         return $checkGoodsPrice;
@@ -63,7 +60,7 @@ class CartServices extends BaseServices
 
     /**
      * @param $userId
-     * @param  null  $cartId
+     * @param null $cartId
      * @return Cart[]|Builder[]|Collection|\Illuminate\Support\Collection|\think\Collection
      * @throws BusinessException
      * 获取用户购物车选中的商品
@@ -134,13 +131,13 @@ class CartServices extends BaseServices
      */
     public function getValidCartList($userId)
     {
-        $lists          = $this->getCartList($userId);
-        $goodIds        = $lists->pluck('goods_id')->toArray();
+        $lists = $this->getCartList($userId);
+        $goodIds = $lists->pluck('goods_id')->toArray();
         $inValidCartIds = [];
-        $goodsList      = GoodsServices::getInstance()->getGoodsListByIds($goodIds)->keyBy('id');
-        $lists          = $lists->filter(function (Cart $listItem) use ($goodsList, &$inValidCartIds) {
+        $goodsList = GoodsServices::getInstance()->getGoodsListByIds($goodIds)->keyBy('id');
+        $lists = $lists->filter(function (Cart $listItem) use ($goodsList, &$inValidCartIds) {
             /** @var Goods $good */
-            $good    = $goodsList->get($listItem->goods_id);
+            $good = $goodsList->get($listItem->goods_id);
             $isValid = !empty($good) && $good->is_on_sale;
             if (!$isValid) {
                 $inValidCartIds[] = $listItem->id;
@@ -176,7 +173,7 @@ class CartServices extends BaseServices
 
     /**
      * @param $cartId
-     * @param  string[]  $column
+     * @param string[] $column
      * @return Cart|Cart[]|Builder|Builder[]|Collection|Model|null
      * 获取购物车的数据
      */
@@ -294,8 +291,8 @@ class CartServices extends BaseServices
 
     /**
      * @param $userId
-     * @param  GoodsProduct  $goodsProduct
-     * @param  Goods  $goods
+     * @param GoodsProduct $goodsProduct
+     * @param Goods $goods
      * @param $number
      * @return Cart
      * @throws BusinessException
@@ -307,16 +304,16 @@ class CartServices extends BaseServices
         if ($number > $goodsProduct->number) {
             $this->throwBusinessException(CodeResponse::GOODS_NO_STOCK);
         }
-        $cart->goods_sn       = $goods->goods_sn;
-        $cart->goods_name     = $goods->name;
-        $cart->pic_url        = $goodsProduct->url ?: $goods->pic_url;
-        $cart->price          = $goodsProduct->price;
-        $cart->goods_id       = $goods->id;
-        $cart->product_id     = $goodsProduct->id;
+        $cart->goods_sn = $goods->goods_sn;
+        $cart->goods_name = $goods->name;
+        $cart->pic_url = $goodsProduct->url ?: $goods->pic_url;
+        $cart->price = $goodsProduct->price;
+        $cart->goods_id = $goods->id;
+        $cart->product_id = $goodsProduct->id;
         $cart->specifications = $goodsProduct->specifications;
-        $cart->checked        = true;
-        $cart->user_id        = $userId;
-        $cart->number         = $number;
+        $cart->checked = true;
+        $cart->user_id = $userId;
+        $cart->number = $number;
         $cart->save();
         return $cart;
     }

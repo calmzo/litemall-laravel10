@@ -2,14 +2,9 @@
 
 namespace App\Http\Controllers\Wx;
 
-use App\Services\AdServices;
-use App\Services\Goods\BrandServices;
-use App\Services\Goods\CategoryServices;
-use App\Services\Goods\GoodsServices;
-use App\Services\Promotion\CouponServices;
-use App\Services\Promotion\GrouponServices;
-use App\Services\SystemServices;
-use App\Services\TopicServices;
+use App\Services\Goods\{BrandServices, CategoryServices, GoodsServices};
+use App\Services\Promotion\{CouponServices, GrouponServices};
+use App\Services\{SystemServices, TopicServices, AdServices};
 use Illuminate\Support\Facades\Cache;
 
 class HomeController extends WxController

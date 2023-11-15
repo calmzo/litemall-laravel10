@@ -3,18 +3,14 @@
 namespace App\Services\Promotion;
 
 use App\Exceptions\BusinessException;
-use App\Inputs\PageInput;
-use App\Models\Promotion\Coupon;
-use App\Models\Promotion\CouponUser;
+use App\Inputs\{PageInput};
+use App\Models\Promotion\{Coupon, CouponUser};
 use App\Services\BaseServices;
-use App\Utils\CodeResponse;
-use App\Utils\Constant;
+use App\Utils\{CodeResponse, Constant};
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Concerns\BuildsQueries;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Concerns\{BuildsQueries};
+use Illuminate\Database\Eloquent\{Builder, Collection, Model};
 
 class CouponServices extends BaseServices
 {
@@ -25,8 +21,8 @@ class CouponServices extends BaseServices
 
     /**
      * @param $userId
-     * @param  int  $offset
-     * @param  int  $limit
+     * @param int $offset
+     * @param int $limit
      * @return Coupon[]|array|BuildsQueries[]|Builder[]|Collection|\Illuminate\Database\Query\Builder[]|\Illuminate\Support\Collection
      * 获取登录用户没有领过的优惠券
      */
@@ -39,8 +35,8 @@ class CouponServices extends BaseServices
     }
 
     /**
-     * @param  Coupon  $coupon
-     * @param  CouponUser  $couponUser
+     * @param Coupon $coupon
+     * @param CouponUser $couponUser
      * @param $price
      * @return bool
      * 检查优惠券的有效性
@@ -67,7 +63,7 @@ class CouponServices extends BaseServices
         switch ($coupon->time_type) {
             case Constant::COUPON_TIME_TYPE_TIME:
                 $start_time = strtotime($coupon->start_time);
-                $end_time   = strtotime($coupon->end_time);
+                $end_time = strtotime($coupon->end_time);
                 if (!($start_time < time() && $end_time > time())) {
                     return false;
                 }
@@ -107,8 +103,8 @@ class CouponServices extends BaseServices
     public function getUserMeetCoupons($userId, $checkedGoodsPrice, $couponId, $userCouponId)
     {
         $couponsUsers = CouponServices::getInstance()->getUsableCoupons($userId);
-        $couponIds    = $couponsUsers->pluck('coupon_id')->toArray();
-        $coupons      = CouponServices::getInstance()->getCouponsByIds($couponIds)->keyBy('id');
+        $couponIds = $couponsUsers->pluck('coupon_id')->toArray();
+        $coupons = CouponServices::getInstance()->getCouponsByIds($couponIds)->keyBy('id');
         $couponsUsers = $couponsUsers->filter(function (CouponUser $couponUser) use ($coupons, $checkedGoodsPrice) {
             $coupon = $coupons->get($couponUser->coupon_id);
             return CouponServices::getInstance()->checkCouponAndPrice($coupon, $couponUser, $checkedGoodsPrice);
@@ -125,17 +121,17 @@ class CouponServices extends BaseServices
         $couponPrice = 0;
         if (is_null($couponId) || $couponId == -1) {
             $userCouponId = -1;
-            $couponId     = -1;
+            $couponId = -1;
         } elseif ($couponId == 0) {
             /** @var CouponUser $couponUser */
-            $couponUser   = $couponsUsers->first();
-            $couponId     = $couponUser->coupon_id ?? 0;
+            $couponUser = $couponsUsers->first();
+            $couponId = $couponUser->coupon_id ?? 0;
             $userCouponId = $couponUser->id ?? 0;
-            $couponPrice  = CouponServices::getInstance()->getCoupon($couponId)->discount ?? 0;
+            $couponPrice = CouponServices::getInstance()->getCoupon($couponId)->discount ?? 0;
         } else {
-            $coupon     = CouponServices::getInstance()->getCoupon($couponId);
+            $coupon = CouponServices::getInstance()->getCoupon($couponId);
             $couponUser = CouponServices::getInstance()->getCouponUser($userCouponId);
-            $isValid    = CouponServices::getInstance()->checkCouponAndPrice($coupon, $couponUser, $checkedGoodsPrice);
+            $isValid = CouponServices::getInstance()->checkCouponAndPrice($coupon, $couponUser, $checkedGoodsPrice);
             if ($isValid) {
                 $couponPrice = $coupon->discount ?? 0;
             }
@@ -158,14 +154,14 @@ class CouponServices extends BaseServices
         }
 
         //当前已领取的数量和总数量比较
-        $total        = $coupon->total;
+        $total = $coupon->total;
         $totalCoupons = $this->getCouponUserTotalByCouponId($couponId);
         if ($total != 0 && $totalCoupons >= $total) {
             $this->throwBusinessException(CodeResponse::COUPON_EXCEED_LIMIT);
         }
 
         //当前用户已领取数量和用户限领取数量进行比较
-        $limit           = $coupon->limit;
+        $limit = $coupon->limit;
         $userCouponCount = $this->getUserCouponsCount($couponId, $userId);
         if ($limit != 0 && $userCouponCount >= $limit) {
             $this->throwBusinessException(CodeResponse::COUPON_EXCEED_LIMIT, '优惠券已经领取过');
@@ -193,10 +189,10 @@ class CouponServices extends BaseServices
         $timeType = $coupon->time_type;
         if ($timeType == Constant::COUPON_TIME_TYPE_TIME) {
             $start_time = $coupon->start_time;
-            $end_time   = $coupon->end_time;
+            $end_time = $coupon->end_time;
         } elseif ($timeType == Constant::COUPON_TIME_TYPE_DAYS) {
             $start_time = Carbon::now()->toDateTimeString();
-            $end_time   = date("Y-m-d H:i:s", time() + $coupon->days * 24 * 3600);
+            $end_time = date("Y-m-d H:i:s", time() + $coupon->days * 24 * 3600);
         }
         $this->saveCouponUser($userId, $couponId, $start_time, $end_time);
     }
@@ -210,12 +206,12 @@ class CouponServices extends BaseServices
      */
     public function saveCouponUser($userId, $couponId, $start_time, $end_time)
     {
-        $couponUser              = CouponUser::new();
-        $couponUser->user_id     = $userId;
-        $couponUser->coupon_id   = $couponId;
-        $couponUser->start_time  = $start_time;
-        $couponUser->end_time    = $end_time;
-        $couponUser->add_time    = Carbon::now()->toDateTimeString();
+        $couponUser = CouponUser::new();
+        $couponUser->user_id = $userId;
+        $couponUser->coupon_id = $couponId;
+        $couponUser->start_time = $start_time;
+        $couponUser->end_time = $end_time;
+        $couponUser->add_time = Carbon::now()->toDateTimeString();
         $couponUser->update_time = Carbon::now()->toDateTimeString();
         $couponUser->save();
     }
@@ -263,8 +259,8 @@ class CouponServices extends BaseServices
 
 
     /**
-     * @param  PageInput  $page
-     * @param  string[]  $column
+     * @param PageInput $page
+     * @param string[] $column
      * @return LengthAwarePaginator
      * 获取优惠列表
      */
@@ -277,10 +273,10 @@ class CouponServices extends BaseServices
     }
 
     /**
-     * @param  PageInput  $page
+     * @param PageInput $page
      * @param $status
      * @param $userId
-     * @param  string[]  $column
+     * @param string[] $column
      * @return LengthAwarePaginator
      * 获取用户的优惠券
      */

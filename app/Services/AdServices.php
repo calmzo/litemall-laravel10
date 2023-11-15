@@ -3,7 +3,6 @@
 
 namespace App\Services;
 
-
 use App\Models\Ad;
 
 class AdServices extends BaseServices

@@ -8,8 +8,7 @@ use App\Models\Comment;
 use App\Services\User\UserServices;
 use App\Utils\Constant;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\{Arr, Carbon};
 
 class CommentServices extends BaseServices
 {

@@ -7,9 +7,7 @@ use App\Services\User\UserServices;
 use App\Utils\CodeResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\{Auth, Cache, Hash};
 
 class AuthController extends WxController
 {
@@ -58,8 +56,8 @@ class AuthController extends WxController
         $user->nickname = $username;
         $user->last_login_time = Carbon::now()->toDateTimeString();
         $user->last_login_ip = $request->getClientIp();
-        $user->add_time        = Carbon::now()->toDateTimeString();
-        $user->update_time     = Carbon::now()->toDateTimeString();
+        $user->add_time = Carbon::now()->toDateTimeString();
+        $user->update_time = Carbon::now()->toDateTimeString();
         $user->save();
 
         // 给新用户发送注册优惠券
@@ -91,7 +89,7 @@ class AuthController extends WxController
         }
 
         $user->last_login_time = now()->toDateTimeString();
-        $user->last_login_ip   = $request->getClientIp();
+        $user->last_login_ip = $request->getClientIp();
 
         if (!$user->save()) {
             return $this->fail(CodeResponse::UPDATED_FAIL);
@@ -180,11 +178,11 @@ class AuthController extends WxController
      */
     public function resetPhone(Request $request)
     {
-        $mobile   = $this->verifyString('mobile');
-        $code     = $this->verifyString('code');
+        $mobile = $this->verifyString('mobile');
+        $code = $this->verifyString('code');
         $password = $this->verifyString('password');
 
-        $isPass   = UserServices::getInstance()->checkCaptcha($mobile, $code);
+        $isPass = UserServices::getInstance()->checkCaptcha($mobile, $code);
         if (!$isPass) {
             return $this->fail(CodeResponse::AUTH_CAPTCHA_UNMATCH);
         }
@@ -193,7 +191,7 @@ class AuthController extends WxController
         if (is_null($user)) {
             return $this->fail(CodeResponse::AUTH_MOBILE_UNREGISTERED);
         }
-        $password       = Hash::make($password);
+        $password = Hash::make($password);
         $user->password = $password;
         return $user->save() ? $this->success() : $this->fail(CodeResponse::UPDATED_FAIL);
     }
@@ -204,8 +202,8 @@ class AuthController extends WxController
     public function profile(Request $request)
     {
         $nickname = $this->verifyString('nickname', null);
-        $avatar   = $this->verifyString('avatar', null);
-        $gender   = $this->verifyString('gender', null);
+        $avatar = $this->verifyString('avatar', null);
+        $gender = $this->verifyString('gender', null);
 
         /** @var User $user */
         $user = $this->user();

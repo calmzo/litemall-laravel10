@@ -2,17 +2,11 @@
 
 namespace App\Services\Goods;
 
-use App\Inputs\GoodsListInput;
-use App\Models\Collect;
-use App\Models\Comment;
-use App\Models\FootPrint;
-use App\Models\Goods\Goods;
-use App\Models\Goods\GoodsAttribute;
-use App\Models\Goods\GoodsProduct;
-use App\Models\Goods\GoodsSpecification;
-use App\Models\Issue;
+use App\Inputs\{GoodsListInput};
+use App\Models\{Collect, Comment, FootPrint, Issue};
+use App\Models\Goods\{Goods, GoodsAttribute, GoodsProduct, GoodsSpecification};
 use App\Services\BaseServices;
-use App\Services\User\UserServices;
+use App\Services\User\{UserServices};
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Database\Eloquent\Collection;

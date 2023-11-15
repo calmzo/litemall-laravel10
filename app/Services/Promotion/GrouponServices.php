@@ -2,21 +2,17 @@
 
 namespace App\Services\Promotion;
 
-use App\Inputs\PageInput;
-use App\Models\Promotion\Groupon;
-use App\Models\Promotion\GrouponRules;
+use App\Inputs\{PageInput};
+use App\Models\Promotion\{Groupon, GrouponRules};
 use App\Services\BaseServices;
-use App\Utils\CodeResponse;
-use App\Utils\Constant;
+use App\Utils\{CodeResponse, Constant};
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
+use Illuminate\Support\{Str};
 use Intervention\Image\AbstractFont;
 use Intervention\Image\Facades\Image;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\{Builder, Collection, Model};
 
 class GrouponServices extends BaseServices
 {
@@ -47,7 +43,7 @@ class GrouponServices extends BaseServices
                 $font->size(28);
 //                $font->file(resource_path('ttf/msyh.ttf'));
             });
-        $filePath = "groupon/".Carbon::now()->toDateString().'/'.Str::random().'.png';
+        $filePath = "groupon/" . Carbon::now()->toDateString() . '/' . Str::random() . '.png';
         Storage::disk('public')->put($filePath, $image->encode());
         $url = Storage::url($filePath);
         return $url;
@@ -84,7 +80,7 @@ class GrouponServices extends BaseServices
         }
 
         $groupon->status = Constant::Groupon_STATUS_ON;
-        $isSuccess       = $groupon->save();
+        $isSuccess = $groupon->save();
 
         if (!$isSuccess) {
             $this->throwBusinessException(CodeResponse::UPDATED_FAIL);
@@ -113,13 +109,13 @@ class GrouponServices extends BaseServices
      * 1、获取链接，创建二维码
      * 2、合成图片
      * 3、保存图片，返回图片地址
-     * @param  GrouponRules  $rules
+     * @param GrouponRules $rules
      * @return string
      */
     public function createGroupShareImage(GrouponRules $rules)
     {
-        $shareUrl   = \route('home.redirectShareUrl', ['type' => 'groupon', 'id' => $rules->goods_id]);
-        $qrcode     = QrCode::format('png')->margin(1)->size(290)->generate($shareUrl);
+        $shareUrl = \route('home.redirectShareUrl', ['type' => 'groupon', 'id' => $rules->goods_id]);
+        $qrcode = QrCode::format('png')->margin(1)->size(290)->generate($shareUrl);
         $goodsImage = Image::make($rules->pic_url)->resize(660, 660);
 
         $image = Image::make(resource_path('/images/back_groupon.png'))
@@ -138,7 +134,7 @@ class GrouponServices extends BaseServices
 
     /**
      * @param $orderId
-     * @param  string[]  $column
+     * @param string[] $column
      * @return Groupon|Builder|Model|object|null
      * 根据订单Id获取团购数据
      */
@@ -149,8 +145,8 @@ class GrouponServices extends BaseServices
 
 
     /**
-     * @param  PageInput  $page
-     * @param  string[]  $column
+     * @param PageInput $page
+     * @param string[] $column
      * @return LengthAwarePaginator
      * 获取团购规则列表数据
      */
@@ -162,7 +158,7 @@ class GrouponServices extends BaseServices
 
     /**
      * @param $ruleId
-     * @param  string[]  $column
+     * @param string[] $column
      * @return GrouponRules|GrouponRules[]|Builder|Builder[]|Collection|Model|null
      * 获取团购规则的数据
      */
@@ -198,7 +194,7 @@ class GrouponServices extends BaseServices
     /**
      * @param $userId
      * @param $ruleId
-     * @param  null  $linkId
+     * @param null $linkId
      * @throws BusinessException
      * 检查用户是否有开团的资格
      */
@@ -233,8 +229,8 @@ class GrouponServices extends BaseServices
     }
 
     /**
-     * @param  int  $groupId  团购ID
-     * @param  string[]  $column  字段
+     * @param int $groupId 团购ID
+     * @param string[] $column 字段
      * @return Groupon|Groupon[]|Builder|Builder[]|Collection|Model|null
      * 获取团购的数据
      */
@@ -256,22 +252,22 @@ class GrouponServices extends BaseServices
         if ($ruleId == null || $ruleId < 0) {
             return $ruleId;
         }
-        $groupon           = new Groupon();
+        $groupon = new Groupon();
         $groupon->order_id = $orderId;
-        $groupon->status   = Constant::Groupon_STATUS_NONE;
-        $groupon->user_id  = $userId;
+        $groupon->status = Constant::Groupon_STATUS_NONE;
+        $groupon->user_id = $userId;
         $groupon->rules_id = $ruleId;
 
         //参与者
         if ($linkId != null && $linkId > 0) {
-            $groupon->groupon_id      = $linkId;
-            $baseGroupon              = $this->getGrouponById($linkId);
+            $groupon->groupon_id = $linkId;
+            $baseGroupon = $this->getGrouponById($linkId);
             $groupon->creator_user_id = $baseGroupon->creator_user_id;
-            $groupon->share_url       = $baseGroupon->share_url;
+            $groupon->share_url = $baseGroupon->share_url;
             $groupon->save();
         }
-        $groupon->creator_user_id   = $userId;
-        $groupon->groupon_id        = 0;
+        $groupon->creator_user_id = $userId;
+        $groupon->groupon_id = 0;
         $groupon->creator_user_time = Carbon::now()->toDateTimeString();
         return $groupon->save();
     }

@@ -2,11 +2,10 @@
 
 namespace App\Services\Goods;
 
-use App\Models\Goods\Category;
-use App\Services\BaseServices;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Goods\{Category};
+use App\Services\{BaseServices};
+use Illuminate\Database\Eloquent\{Builder};
+use Illuminate\Database\Eloquent\{Collection, Model};
 
 class CategoryServices extends BaseServices
 {

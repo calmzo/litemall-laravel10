@@ -2,21 +2,11 @@
 
 namespace App\Http\Controllers\Wx;
 
+use App\Services\Goods\{BrandServices, CatalogServices, CategoryServices, GoodsServices};
+use App\Services\{CollectServices, CommentServices, SearchHistoryServices};
+use App\Utils\{CodeResponse, Constant};
 use App\Exceptions\BusinessException;
 use App\Inputs\GoodsListInput;
-use App\Services\CollectServices;
-use App\Services\CommentServices;
-use App\Services\Goods\BrandServices;
-use App\Services\Goods\CatalogServices;
-use App\Services\Goods\CategoryServices;
-use App\Services\Goods\GoodsAttributeServices;
-use App\Services\Goods\GoodsProductServices;
-use App\Services\Goods\GoodsServices;
-use App\Services\Goods\GoodsSpecificationServices;
-use App\Services\Goods\IssueServices;
-use App\Services\SearchHistoryServices;
-use App\Utils\CodeResponse;
-use App\Utils\Constant;
 use Illuminate\Http\Request;
 
 class GoodsController extends WxController
