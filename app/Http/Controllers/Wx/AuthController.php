@@ -125,7 +125,7 @@ class AuthController extends WxController
             return $this->fail(CodeResponse::AUTH_CAPTCHA_FREQUENCY, '验证码每天发送不能超过10次');
         }
         $code = UserServices::getInstance()->setCaptcha($mobile);
-        UserServices::getInstance()->sendCaptchaMsg($mobile, $code);
+        UserServices::getInstance()->sendCaptchaMsg(mobile: $mobile, code: $code);
 
         return $this->success();
     }
@@ -182,7 +182,7 @@ class AuthController extends WxController
         $code = $this->verifyString('code');
         $password = $this->verifyString('password');
 
-        $isPass = UserServices::getInstance()->checkCaptcha($mobile, $code);
+        $isPass = UserServices::getInstance()->checkCaptcha(mobile: $mobile, code: $code);
         if (!$isPass) {
             return $this->fail(CodeResponse::AUTH_CAPTCHA_UNMATCH);
         }

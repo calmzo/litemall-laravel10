@@ -19,7 +19,7 @@ class GoodsServices extends BaseServices
     public function listL2Gategory(GoodsListInput $input)
     {
 
-        $query = $this->getGoodsQuery($input);
+        $query = $this->getGoodsQuery(query: $input);
         $categoryIds = $query->select('category_id')->pluck('category_id')->toArray();
         return CatalogServices::getInstance()->getL2ListByIds($categoryIds);
     }
@@ -120,18 +120,18 @@ class GoodsServices extends BaseServices
 
         $conditions = [
             'is_on_sale' => 1,
-            'is_new'     => 1
+            'is_new' => 1
         ];
-        return $this->getGoodsByConditions($conditions, $offset, $limit);
+        return $this->getGoodsByConditions(conditions: $conditions, offset: $offset, limit: $limit);
     }
 
     /**
      * @param $conditions
      * @param $offset
      * @param $limit
-     * @param  string  $sort
-     * @param  string  $order
-     * @param  string[]  $columns
+     * @param string $sort
+     * @param string $order
+     * @param string[] $columns
      * @return Goods[]|Builder[]|Collection|\Illuminate\Database\Query\Builder[]|\Illuminate\Support\Collection
      * 根据条件获取商品数据
      */
@@ -142,7 +142,8 @@ class GoodsServices extends BaseServices
         $sort = 'add_time',
         $order = 'desc',
         $columns = ['id', 'name', 'brief', 'pic_url', 'is_new', 'is_hot', 'counter_price', 'retail_price']
-    ) {
+    )
+    {
         return Goods::query()->where($conditions)->offset($offset)->limit($limit)->orderBy($sort, $order)->get($columns);
     }
 
@@ -155,10 +156,10 @@ class GoodsServices extends BaseServices
     public function getHotGoods($limit, $offset = 0)
     {
         $conditions = [
-            'is_hot'     => 1,
+            'is_hot' => 1,
             'is_on_sale' => 1
         ];
-        return $this->getGoodsByConditions($conditions, $offset, $limit);
+        return $this->getGoodsByConditions(conditions: $conditions, offset: $offset, limit: $limit);
     }
 
 
@@ -183,7 +184,7 @@ class GoodsServices extends BaseServices
     public function addStock($productId, $num)
     {
         /** @var GoodsProduct $product */
-        $product         = $this->getGoodsProductById($productId);
+        $product = $this->getGoodsProductById($productId);
         $product->number = $product->number + $num;
         return $product->cas();
     }
@@ -229,7 +230,7 @@ class GoodsServices extends BaseServices
     }
 
     /**
-     * @param  array  $ids
+     * @param array $ids
      * @return GoodsProduct[]|Builder[]|Collection|\Illuminate\Database\Query\Builder[]|\Illuminate\Support\Collection
      * 批量获取产品
      */
@@ -288,7 +289,13 @@ class GoodsServices extends BaseServices
             'id', 'name', 'brief', 'pic_url', 'is_new', 'is_hot', 'counter_price', 'retail_price'
         ])->where('is_on_sale', 1);
 
-        $query = $this->getGoodsQuery($query, $input->keyword, $input->brandId, $input->isNew, $input->isHot);
+        $query = $this->getGoodsQuery(
+            query: $query,
+            keywords: $input->keyword,
+            brandId: $input->brandId,
+            isNew: $input->isNew,
+            isHot: $input->isHot
+        );
 
         if (!empty($input->categoryId)) {
             $query = $query->where('category_id', $input->categoryId);
@@ -302,14 +309,20 @@ class GoodsServices extends BaseServices
     }
 
     /**
-     * @param  GoodsListInput  $input
+     * @param GoodsListInput $input
      * @return mixed
      * 获取商品分类ID的数据
      */
     public function getCatIds(GoodsListInput $input)
     {
         $query = Goods::query()->where('is_on_sale', 1);
-        $query = $this->getGoodsQuery($query, $input->keyword, $input->brandId, $input->isNew, $input->isHot);
+        $query = $this->getGoodsQuery(
+            query: $query,
+            keywords: $input->keyword,
+            brandId: $input->brandId,
+            isNew: $input->isNew,
+            isHot: $input->isHot
+        );
         return $query->select(['category_id'])->pluck('category_id')->toArray();
     }
 

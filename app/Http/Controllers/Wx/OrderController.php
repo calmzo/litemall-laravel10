@@ -55,7 +55,9 @@ class OrderController extends WxController
         $page = PageInput::new();
         $showType = $this->verifyEnum('showType', 0, array_keys(Constant::ORDER_SHOW_TYPE_STATUS_MAP));
         $status = Constant::ORDER_SHOW_TYPE_STATUS_MAP[$showType];
-        $orderListsWithPage = OrderServices::getInstance()->getOrderList($this->userId(), $page, $status);
+        $orderListsWithPage = OrderServices::getInstance()->getOrderList(userId: $this->userId(),
+            page: $page,
+            status: $status);
         $orderLists = collect($orderListsWithPage->items());
         $orderIds = $orderLists->pluck('id')->toArray();
 
@@ -72,7 +74,10 @@ class OrderController extends WxController
             $goodsList = $goodsList->map(function (OrderGoods $orderGoods) {
                 return OrderServices::getInstance()->coverOrderGoods($orderGoods);
             });
-            return OrderServices::getInstance()->coverOrder($order, $grouponOrderIds, $goodsList);
+            return OrderServices::getInstance()->coverOrder(
+                order: $order,
+                grouponOrders: $grouponOrderIds,
+                goodsList: $goodsList);
         });
 
         $data = $this->paginate($orderListsWithPage, $list);

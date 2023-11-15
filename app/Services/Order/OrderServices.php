@@ -3,6 +3,7 @@
 namespace App\Services\Order;
 
 use App\Exceptions\BusinessException;
+use Illuminate\Contracts\Pagination\{LengthAwarePaginator};
 use App\Inputs\{OrderGoodsSubmit, PageInput};
 use App\Jobs\OverTimeCancelOrder;
 use App\Models\Cart\{Cart};
@@ -696,7 +697,7 @@ class OrderServices extends BaseServices
         $orderSn = $data['out_trade_no'] ?? '';
         $payId = $data['transaction_id'] ?? '';
         $price = bcdiv($data['total_price'], 100, 2);
-        return $this->notify($price, $orderSn, $payId);
+        return $this->notify(price: $price, orderSn: $orderSn, payId: $payId);
     }
 
 
@@ -741,7 +742,7 @@ class OrderServices extends BaseServices
         $orderSn = $data['out_trade_no'] ?? '';
         $payId = $data['transaction_id'] ?? '';
         $price = $data['total_amount'] ?? 0;
-        return $this->notify($price, $orderSn, $payId);
+        return $this->notify(price: $price, orderSn: $orderSn, payId: $payId);
     }
 
 
